@@ -8,28 +8,35 @@ import { InvalidApiKeyException } from '../../exceptions/security.exception';
 /**
  * Level 1 — API Key Guard
  *
- * Validates the x-api-key header against a list of allowed keys.
- * Keys can be defined globally (via module options) or overridden per route.
+ * Validates the x-api-key header against:
+ *   1. Keys defined per-route via @ApiKey({ keys: [...] })
+ *   2. process.env.API_KEY — always included, read at request time
+ *
+ * Why read process.env.API_KEY in canActivate and not in a @ApiKey() decorator?
+ * TypeScript decorators are evaluated when the class is defined, which happens
+ * during the module import phase — before dotenv.config() runs in main.ts.
+ * Reading the env var at request time (inside canActivate) guarantees it's available.
  *
  * Usage:
- *   // Global key list — set via GuardNestModule.forRoot({ apiKey: { keys: [...] } })
- *   // Per-route override:
- *   @ApiKey({ keys: ['route-specific-key'] })
+ *   // Env-only (no hardcoded keys — recommended):
+ *   @ApiKey({ keys: [] })
  *   @UseGuards(ApiKeyGuard)
  *   @Get('webhook')
  *   webhook() {}
+ *
+ *   // Multi-key (hardcoded list + env — useful for key rotation):
+ *   @ApiKey({ keys: ['old-key', 'new-key'] })
+ *   @UseGuards(ApiKeyGuard)
+ *   @Get('internal')
+ *   internal() {}
+ *
+ * Generate a key: npx ts-node scripts/generate-api-key.ts
  */
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
   private readonly logger = new Logger(ApiKeyGuard.name);
-  private readonly globalKeys: string[];
 
-  constructor(
-    private reflector: Reflector,
-    globalKeys: string[] = [],
-  ) {
-    this.globalKeys = globalKeys;
-  }
+  constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const options = this.reflector.getAllAndOverride<ApiKeyOptions>(GUARD_METADATA.API_KEY_OPTIONS, [
@@ -38,14 +45,18 @@ export class ApiKeyGuard implements CanActivate {
     ]);
 
     const request = context.switchToHttp().getRequest<Request>();
-    const apiKey = request.headers['x-api-key'] as string | undefined;
+    const apiKey  = request.headers['x-api-key'] as string | undefined;
 
     if (!apiKey) {
       this.logger.warn(`No x-api-key header — ${request.method} ${request.url}`);
       throw new InvalidApiKeyException();
     }
 
-    const validKeys = options?.keys ?? this.globalKeys;
+    // Merge route-level keys with the env var key (read at request time).
+    // Set deduplicates in case the same key appears in both.
+    const routeKeys = options?.keys ?? [];
+    const envKey    = process.env.API_KEY ? [process.env.API_KEY] : [];
+    const validKeys = [...new Set([...routeKeys, ...envKey])];
 
     if (validKeys.length === 0) {
       this.logger.warn('ApiKeyGuard: no keys configured — blocking all requests');

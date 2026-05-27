@@ -4,6 +4,7 @@ import { Roles } from '../decorators/roles.decorator';
 import { Permissions } from '../decorators/permissions.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import { Owner } from '../decorators/owner.decorator';
+import { ApiKey } from '../decorators/api-key.decorator';
 import { ApiKeyGuard } from '../guards/basic/api-key.guard';
 import { BasicAuthGuard } from '../guards/basic/basic-auth.guard';
 import { OwnershipGuard } from '../guards/basic/ownership.guard';
@@ -91,17 +92,46 @@ export class Level1BasicController {
     };
   }
 
-  // ── API Key ───────────────────────────────────────────────────────────────
+  // ── API Key — desde variable de entorno ──────────────────────────────────
   // GET /demo/level1/api-key
-  // Requires: x-api-key: demo-key-123
+  //
+  // Lee la key desde process.env.API_KEY (cargada de .env).
+  // Genera tu propia key: npx ts-node scripts/generate-api-key.ts
+  //
+  // El guard lee la env var en tiempo de request (no en el decorator)
+  // porque dotenv carga DESPUÉS de que los decorators se evalúan.
+  //
+  // Prueba: GET /demo/level1/api-key   Header: x-api-key: <valor de API_KEY en .env>
   @Get('api-key')
-  @SetMetadata(GUARD_METADATA.API_KEY_OPTIONS, { keys: ['demo-key-123', 'otro-key-456'] })
+  @ApiKey({ keys: [] })   // sin hardcodear — usa solo process.env.API_KEY
   @UseGuards(ApiKeyGuard)
   @Public()
   apiKey() {
     return {
       guard: 'ApiKeyGuard',
-      message: 'API key válida — Header: x-api-key: demo-key-123',
+      message: 'API key válida — leída desde process.env.API_KEY',
+      tip: 'Genera tu key: npx ts-node scripts/generate-api-key.ts',
+    };
+  }
+
+  // ── API Key — con keys hardcodeadas (demo multi-key) ─────────────────────
+  // GET /demo/level1/api-key-multi
+  //
+  // Acepta cualquiera de las keys de la lista Y también process.env.API_KEY.
+  // Útil para rotar keys sin downtime: dejas la vieja en la lista mientras
+  // los clientes migran a la nueva del env.
+  //
+  // Prueba: GET /demo/level1/api-key-multi   Header: x-api-key: key-servicio-a
+  @Get('api-key-multi')
+  @ApiKey({ keys: ['key-servicio-a', 'key-servicio-b'] })
+  @UseGuards(ApiKeyGuard)
+  @Public()
+  apiKeyMulti() {
+    return {
+      guard: 'ApiKeyGuard',
+      message: 'API key válida — acepta múltiples keys (rotación sin downtime)',
+      validKeys: ['key-servicio-a', 'key-servicio-b', 'process.env.API_KEY'],
+      tip: 'Patrón para rotar keys: agrega la nueva al env, elimina la vieja de la lista',
     };
   }
 
