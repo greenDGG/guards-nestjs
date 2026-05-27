@@ -1,0 +1,4 @@
+﻿# BasicAuthGuard
+
+> Doc en progreso.
+

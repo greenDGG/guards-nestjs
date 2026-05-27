@@ -1,0 +1,4 @@
+﻿# ConcurrencyInterceptor
+
+> Doc en progreso.
+

@@ -1,0 +1,4 @@
+﻿# BotDetectionGuard
+
+> Doc en progreso.
+

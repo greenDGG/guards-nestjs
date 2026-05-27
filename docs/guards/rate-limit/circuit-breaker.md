@@ -1,0 +1,4 @@
+﻿# CircuitBreakerGuard
+
+> Doc en progreso.
+

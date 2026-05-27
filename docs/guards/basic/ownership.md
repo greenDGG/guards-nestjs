@@ -1,0 +1,4 @@
+﻿# OwnershipGuard
+
+> Doc en progreso.
+

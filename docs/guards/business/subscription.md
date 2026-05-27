@@ -1,0 +1,4 @@
+﻿# SubscriptionGuard
+
+> Doc en progreso.
+

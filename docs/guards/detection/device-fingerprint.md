@@ -1,0 +1,4 @@
+﻿# DeviceFingerprintGuard
+
+> Doc en progreso.
+

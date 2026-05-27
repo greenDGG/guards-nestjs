@@ -1,0 +1,4 @@
+﻿# IdempotencyInterceptor
+
+> Doc en progreso.
+

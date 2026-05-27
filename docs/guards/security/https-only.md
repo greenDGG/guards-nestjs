@@ -1,0 +1,4 @@
+﻿# HttpsOnlyGuard
+
+> Doc en progreso.
+

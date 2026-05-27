@@ -1,0 +1,4 @@
+﻿# AdaptiveRateLimitGuard
+
+> Doc en progreso.
+

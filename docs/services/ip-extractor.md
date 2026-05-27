@@ -1,0 +1,4 @@
+﻿# IpExtractorService
+
+> Doc en progreso.
+

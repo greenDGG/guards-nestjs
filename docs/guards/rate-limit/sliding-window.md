@@ -1,0 +1,4 @@
+﻿# SlidingWindowRateLimitGuard
+
+> Doc en progreso.
+

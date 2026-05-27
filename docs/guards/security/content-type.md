@@ -1,0 +1,4 @@
+﻿# ContentTypeGuard
+
+> Doc en progreso.
+

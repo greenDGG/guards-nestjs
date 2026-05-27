@@ -1,0 +1,4 @@
+﻿# AnomalyDetectionGuard
+
+> Doc en progreso.
+

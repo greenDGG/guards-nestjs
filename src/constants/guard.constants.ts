@@ -1,0 +1,34 @@
+export const GUARD_METADATA = {
+  // Basic
+  API_KEY_OPTIONS: 'guardNest:apiKey:options',
+  BASIC_AUTH_OPTIONS: 'guardNest:basicAuth:options',
+  OWNERSHIP_OPTIONS: 'guardNest:ownership:options',
+  SIGNATURE_OPTIONS: 'guardNest:signature:options',
+  IDEMPOTENCY_OPTIONS: 'guardNest:idempotency:options',
+  NONCE_OPTIONS: 'guardNest:nonce:options',
+  CONCURRENCY_OPTIONS: 'guardNest:concurrency:options',
+  // Security
+  IP_OPTIONS: 'guardNest:ip:options',
+  REQUEST_SIZE_OPTIONS: 'guardNest:requestSize:options',
+  CONTENT_TYPE_OPTIONS: 'guardNest:contentType:options',
+  CORS_OPTIONS: 'guardNest:cors:options',
+  // Rate limit
+  RATE_LIMIT_OPTIONS: 'guardNest:rateLimit:options',
+  ADAPTIVE_RATE_LIMIT_OPTIONS: 'guardNest:adaptiveRateLimit:options',
+  CIRCUIT_BREAKER_OPTIONS: 'guardNest:circuitBreaker:options',
+  // Detection
+  BOT_OPTIONS: 'guardNest:bot:options',
+  GEO_IP_OPTIONS: 'guardNest:geoIp:options',
+  DEVICE_FP_OPTIONS: 'guardNest:deviceFp:options',
+  ANOMALY_OPTIONS: 'guardNest:anomaly:options',
+  // Business
+  SUBSCRIPTION_OPTIONS: 'guardNest:subscription:options',
+  TIME_ACCESS_OPTIONS: 'guardNest:timeAccess:options',
+  TENANT_OPTIONS: 'guardNest:tenant:options',
+  MFA_OPTIONS: 'guardNest:mfa:options',
+  // Web3
+  WALLET_OPTIONS: 'guardNest:wallet:options',
+  CHAIN_ID_OPTIONS: 'guardNest:chainId:options',
+  TOKEN_HOLDER_OPTIONS: 'guardNest:tokenHolder:options',
+  SUSPICIOUS_TX_OPTIONS: 'guardNest:suspiciousTx:options',
+};

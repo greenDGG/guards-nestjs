@@ -1,0 +1,4 @@
+﻿# PermissionsGuard
+
+> Doc en progreso.
+
