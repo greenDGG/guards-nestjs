@@ -28,7 +28,8 @@
     "test:api-key": "ts-node scripts/test-api-key.ts",
     "generate:api-key": "ts-node scripts/generate-api-key.ts",
     "test:basic-auth": "ts-node scripts/test-basic-auth.ts",
-    "test:jwt": "ts-node scripts/test-jwt.ts"
+    "test:jwt": "ts-node scripts/test-jwt.ts",
+    "test:ownership": "ts-node scripts/test-ownership.ts"
   },
   "keywords": ["nestjs", "guards", "jwt", "roles", "permissions", "authentication", "authorization"],
   "dependencies": {
