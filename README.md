@@ -4,9 +4,9 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
 ![NestJS](https://img.shields.io/badge/NestJS-11.x-E0234E?logo=nestjs&logoColor=white)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
-![Guards](https://img.shields.io/badge/guards-33-blueviolet)
+![Guards](https://img.shields.io/badge/guards-34-blueviolet)
 
-33 guards NestJS listos para copiar — desde JWT básico hasta detección de bots y wallets cripto.
+34 guards NestJS listos para copiar — desde JWT básico hasta detección de bots y wallets cripto.
 
 **No es un paquete npm.** Encuentras el guard que necesitas, copias el archivo y lo adaptas.
 
@@ -25,7 +25,7 @@ El flujo es siempre el mismo, sin importar cuál elijas:
 getOrders() { ... }
 ```
 
-Los otros 31 guards funcionan igual. Elige uno, ignora el resto.
+Los otros 32 guards funcionan igual. Elige uno, ignora el resto.
 
 ---
 
@@ -71,29 +71,30 @@ curl -X POST http://localhost:3000/auth/login \
 | 8 | Basic | `IdempotencyInterceptor` | `POST /demo/level2/payment` |
 | 9 | Basic | `NonceGuard` | `POST /demo/level2/nonce-check` |
 | 10 | Basic | `ReplayProtectionGuard` | `POST /demo/level2/replay-protection` |
-| 11 | Basic | `ConcurrencyInterceptor` | `POST /demo/level2/heavy-job` |
-| 12 | Security | `IpGuard` | `GET /demo/level2/ip-whitelist` |
-| 13 | Security | `HttpsOnlyGuard` | `GET /demo/level2/https-only` |
-| 14 | Security | `RequestSizeGuard` | `POST /demo/level2/request-size` |
-| 15 | Security | `ContentTypeGuard` | `POST /demo/level2/content-type` |
-| 16 | Security | `CorsGuard` | `GET /demo/level2/cors` |
-| 17 | Security | `TimingAttackGuard` | `POST /demo/level2/timing-fast` |
-| 18 | Security | `CsrfGuard` | `POST /demo/level2/csrf-protected` |
-| 19 | Rate Limit | `SlidingWindowRateLimitGuard` | `GET /demo/level3/sliding-window` |
-| 20 | Rate Limit | `AdaptiveRateLimitGuard` | `GET /demo/level3/adaptive` |
-| 21 | Rate Limit | `CircuitBreakerGuard` | `GET /demo/level3/circuit-breaker` |
-| 22 | Detection | `BotDetectionGuard` | `GET /demo/level4/bot-check` |
-| 23 | Detection | `GeoIpGuard` | `GET /demo/level4/geo` |
-| 24 | Detection | `DeviceFingerprintGuard` | `GET /demo/level4/fingerprint` |
-| 25 | Detection | `AnomalyDetectionGuard` | `GET /demo/level4/anomaly` |
-| 26 | Business | `SubscriptionGuard` | `GET /demo/level5/pro-feature` |
-| 27 | Business | `TimeBasedAccessGuard` | `GET /demo/level5/office-hours` |
-| 28 | Business | `TenantGuard` | `GET /demo/level5/:tenantId/data` |
-| 29 | Business | `MfaGuard` | `POST /demo/level5/sensitive-action` |
-| 30 | Web3 | `WalletSignatureGuard` | `POST /demo/level6/wallet-action` |
-| 31 | Web3 | `SuspiciousTransactionGuard` | `POST /demo/level6/withdraw` |
-| 32 | Web3 | `TokenHolderGuard` | `GET /demo/level6/token-gate` |
-| 33 | Web3 | `ChainIdGuard` | `POST /demo/level6/swap` |
+| 11 | Basic | `AuditLogInterceptor` | `POST /demo/level2/audit-success` |
+| 12 | Basic | `ConcurrencyInterceptor` | `POST /demo/level2/heavy-job` |
+| 13 | Security | `IpGuard` | `GET /demo/level2/ip-whitelist` |
+| 14 | Security | `HttpsOnlyGuard` | `GET /demo/level2/https-only` |
+| 15 | Security | `RequestSizeGuard` | `POST /demo/level2/request-size` |
+| 16 | Security | `ContentTypeGuard` | `POST /demo/level2/content-type` |
+| 17 | Security | `CorsGuard` | `GET /demo/level2/cors` |
+| 18 | Security | `TimingAttackGuard` | `POST /demo/level2/timing-fast` |
+| 19 | Security | `CsrfGuard` | `POST /demo/level2/csrf-protected` |
+| 20 | Rate Limit | `SlidingWindowRateLimitGuard` | `GET /demo/level3/sliding-window` |
+| 21 | Rate Limit | `AdaptiveRateLimitGuard` | `GET /demo/level3/adaptive` |
+| 22 | Rate Limit | `CircuitBreakerGuard` | `GET /demo/level3/circuit-breaker` |
+| 23 | Detection | `BotDetectionGuard` | `GET /demo/level4/bot-check` |
+| 24 | Detection | `GeoIpGuard` | `GET /demo/level4/geo` |
+| 25 | Detection | `DeviceFingerprintGuard` | `GET /demo/level4/fingerprint` |
+| 26 | Detection | `AnomalyDetectionGuard` | `GET /demo/level4/anomaly` |
+| 27 | Business | `SubscriptionGuard` | `GET /demo/level5/pro-feature` |
+| 28 | Business | `TimeBasedAccessGuard` | `GET /demo/level5/office-hours` |
+| 29 | Business | `TenantGuard` | `GET /demo/level5/:tenantId/data` |
+| 30 | Business | `MfaGuard` | `POST /demo/level5/sensitive-action` |
+| 31 | Web3 | `WalletSignatureGuard` | `POST /demo/level6/wallet-action` |
+| 32 | Web3 | `SuspiciousTransactionGuard` | `POST /demo/level6/withdraw` |
+| 33 | Web3 | `TokenHolderGuard` | `GET /demo/level6/token-gate` |
+| 34 | Web3 | `ChainIdGuard` | `POST /demo/level6/swap` |
 
 ---
 
@@ -102,7 +103,7 @@ curl -X POST http://localhost:3000/auth/login \
 | Categoría | Docs |
 |-----------|------|
 | Basic | [JWT](docs/guards/basic/jwt-auth.md) · [Roles](docs/guards/basic/roles.md) · [Permissions](docs/guards/basic/permissions.md) · [ApiKey](docs/guards/basic/api-key.md) · [BasicAuth](docs/guards/basic/basic-auth.md) |
-| Basic+ | [Ownership](docs/guards/basic/ownership.md) · [Signature](docs/guards/basic/signature.md) · [Idempotency](docs/guards/basic/idempotency.md) · [Nonce](docs/guards/basic/nonce.md) · [Concurrency](docs/guards/basic/concurrency.md) · [ReplayProtection](docs/guards/basic/replay-protection.md) |
+| Basic+ | [Ownership](docs/guards/basic/ownership.md) · [Signature](docs/guards/basic/signature.md) · [Idempotency](docs/guards/basic/idempotency.md) · [Nonce](docs/guards/basic/nonce.md) · [Concurrency](docs/guards/basic/concurrency.md) · [ReplayProtection](docs/guards/basic/replay-protection.md) · [AuditLog](docs/guards/basic/audit-log.md) |
 | Security | [IP/CIDR](docs/guards/security/ip.md) · [HTTPS](docs/guards/security/https-only.md) · [RequestSize](docs/guards/security/request-size.md) · [ContentType](docs/guards/security/content-type.md) · [CORS](docs/guards/security/cors.md) · [TimingAttack](docs/guards/security/timing-attack.md) · [CSRF](docs/guards/security/csrf.md) |
 | Rate Limit | [SlidingWindow](docs/guards/rate-limit/sliding-window.md) · [Adaptive](docs/guards/rate-limit/adaptive.md) · [CircuitBreaker](docs/guards/rate-limit/circuit-breaker.md) |
 | Detection | [BotDetection](docs/guards/detection/bot-detection.md) · [GeoIP](docs/guards/detection/geo-ip.md) · [DeviceFingerprint](docs/guards/detection/device-fingerprint.md) · [Anomaly](docs/guards/detection/anomaly-detection.md) |
@@ -172,6 +173,7 @@ npm run test:cors            # CorsGuard
 npm run test:timing-attack   # TimingAttackGuard
 npm run test:csrf               # CsrfGuard
 npm run test:replay-protection  # ReplayProtectionGuard
+npm run test:audit-log          # AuditLogInterceptor
 ```
 
 </details>

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Res, UseGuards, UseInterceptors, SetMetadata } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, Post, Body, Res, UseGuards, UseInterceptors, SetMetadata } from '@nestjs/common';
 import { Response } from 'express';
 import { Public } from '../decorators/public.decorator';
 import { IpFilter } from '../decorators/ip.decorator';
@@ -16,6 +16,8 @@ import { CsrfGuard, generateCsrfToken } from '../guards/security/csrf.guard';
 import { SignatureGuard } from '../guards/basic/signature.guard';
 import { ReplayProtectionGuard } from '../guards/basic/replay-protection.guard';
 import { ReplayProtect } from '../decorators/replay-protection.decorator';
+import { AuditLogInterceptor } from '../guards/basic/audit-log.interceptor';
+import { AuditLog } from '../decorators/audit-log.decorator';
 import { IdempotencyInterceptor } from '../guards/basic/idempotency.interceptor';
 import { NonceGuard } from '../guards/basic/nonce.guard';
 import { ConcurrencyInterceptor } from '../guards/basic/concurrency.interceptor';
@@ -320,6 +322,38 @@ export class Level2SecurityController {
         });
       }, 1000),
     );
+  }
+
+  // ── Audit Log — registro de acceso (quién, qué, cuándo, desde dónde) ────
+  //
+  // AuditLogInterceptor nunca bloquea — siempre pasa la request al handler.
+  // Registra: userId, IP, user-agent, action, body (sanitizado), status, ms.
+  // Responde con X-Trace-Id para correlacionar logs del cliente con el servidor.
+  //
+  // Endpoint de éxito — ver logs del servidor para el audit trail
+  @Post('audit-success')
+  @AuditLog({ action: 'demo:read-sensitive-data', resource: 'demo' })
+  @UseInterceptors(AuditLogInterceptor)
+  auditSuccess(@Body() body: any) {
+    return {
+      interceptor: 'AuditLogInterceptor',
+      message: 'Acceso registrado en el audit log del servidor',
+      tip: 'Revisa la consola del servidor — busca: AUDIT trace=...',
+      received: body,
+    };
+  }
+
+  // Endpoint que falla — el audit log registra el error con el status correcto
+  @Post('audit-fail')
+  @AuditLog({
+    action: 'demo:access-restricted',
+    resource: 'demo',
+    sensitiveFields: ['password', 'token'],
+  })
+  @UseInterceptors(AuditLogInterceptor)
+  auditFail(@Body() body: any) {
+    // Simula acceso denegado — el interceptor lo captura y registra outcome=error
+    throw new ForbiddenException('Acceso denegado — sin permisos');
   }
 
   // ── Concurrency global — endpoint de recurso único ────────────────────────

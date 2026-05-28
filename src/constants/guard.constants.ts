@@ -7,6 +7,7 @@ export const GUARD_METADATA = {
   IDEMPOTENCY_OPTIONS: 'guardNest:idempotency:options',
   NONCE_OPTIONS: 'guardNest:nonce:options',
   REPLAY_PROTECTION_OPTIONS: 'guardNest:replayProtection:options',
+  AUDIT_LOG_OPTIONS: 'guardNest:auditLog:options',
   CONCURRENCY_OPTIONS: 'guardNest:concurrency:options',
   // Security
   IP_OPTIONS: 'guardNest:ip:options',
