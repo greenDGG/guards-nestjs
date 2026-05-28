@@ -39,6 +39,16 @@ export class AuthController {
     return { status: 'ok', message: 'Auth service is running', timestamp: new Date().toISOString() };
   }
 
+  // Genera un token con subscriptionPlan — solo para test scripts (no usar en producción)
+  @Public()
+  @Post('test/subscription-token')
+  @HttpCode(HttpStatus.OK)
+  async subscriptionTestToken(
+    @Body() body: { username: string; password: string; subscriptionPlan: string },
+  ) {
+    return this.authService.loginWithSubscription(body.username, body.password, body.subscriptionPlan);
+  }
+
   // Genera un token con mfaVerifiedAt — solo para test scripts (no usar en producción)
   @Public()
   @Post('test/mfa-token')
