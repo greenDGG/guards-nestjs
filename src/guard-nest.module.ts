@@ -26,6 +26,7 @@ import { IdempotencyInterceptor } from './guards/basic/idempotency.interceptor';
 import { ConcurrencyInterceptor } from './guards/basic/concurrency.interceptor';
 import { CircuitBreakerGuard, CircuitBreakerInterceptor } from './guards/rate-limit/circuit-breaker.guard';
 import { TimingAttackGuard, TimingAttackInterceptor } from './guards/security/timing-attack.guard';
+import { CsrfGuard } from './guards/security/csrf.guard';
 import { AUTH_CONSTANTS } from './constants/auth.constants';
 
 export interface GuardNestModuleOptions {
@@ -61,6 +62,7 @@ const ALL_SERVICES = [
   CircuitBreakerInterceptor,
   TimingAttackGuard,
   TimingAttackInterceptor,
+  CsrfGuard,
   IdempotencyInterceptor,
   ConcurrencyInterceptor,
 ];

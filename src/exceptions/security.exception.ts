@@ -131,3 +131,14 @@ export class IdempotencyConflictException extends HttpException {
     this.name = 'IdempotencyConflictException';
   }
 }
+
+export class CsrfTokenException extends ForbiddenException {
+  constructor(reason: 'missing' | 'mismatch') {
+    super(
+      reason === 'missing'
+        ? 'CSRF token missing — include the csrf-token cookie value in the x-csrf-token header'
+        : 'CSRF token mismatch — cookie and header values do not match',
+    );
+    this.name = 'CsrfTokenException';
+  }
+}

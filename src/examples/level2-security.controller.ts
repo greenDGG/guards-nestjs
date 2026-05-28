@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, UseGuards, UseInterceptors, SetMetadata } from '@nestjs/common';
+import { Controller, Get, Post, Body, Res, UseGuards, UseInterceptors, SetMetadata } from '@nestjs/common';
+import { Response } from 'express';
 import { Public } from '../decorators/public.decorator';
 import { IpFilter } from '../decorators/ip.decorator';
 import { Signature } from '../decorators/signature.decorator';
@@ -11,6 +12,7 @@ import { RequestSizeGuard } from '../guards/security/request-size.guard';
 import { ContentTypeGuard } from '../guards/security/content-type.guard';
 import { CorsGuard } from '../guards/security/cors.guard';
 import { TimingAttackGuard, TimingAttackInterceptor } from '../guards/security/timing-attack.guard';
+import { CsrfGuard, generateCsrfToken } from '../guards/security/csrf.guard';
 import { SignatureGuard } from '../guards/basic/signature.guard';
 import { IdempotencyInterceptor } from '../guards/basic/idempotency.interceptor';
 import { NonceGuard } from '../guards/basic/nonce.guard';
@@ -122,6 +124,29 @@ export class Level2SecurityController {
         message: 'Tarda 200ms internamente (bcrypt simulado), padded a ≥300ms',
       }), 200),
     );
+  }
+
+  // ── CSRF — Double Submit Cookie pattern ──────────────────────────────────
+  // Paso 1: Obtener un token (GET /csrf-token) → guarda cookie + devuelve token
+  // Paso 2: Enviar POST con el token en header x-csrf-token
+  //
+  // Un atacante en otro origen NO puede leer la cookie (same-origin policy)
+  // → no puede construir el header → el guard rechaza la request.
+  @Get('csrf-token')
+  csrfToken(@Res({ passthrough: true }) res: Response) {
+    return { csrfToken: generateCsrfToken(res) };
+  }
+
+  @Post('csrf-protected')
+  @SetMetadata(GUARD_METADATA.CSRF_OPTIONS, {})
+  @UseGuards(CsrfGuard)
+  csrfProtected(@Body() body: any) {
+    return {
+      guard: 'CsrfGuard',
+      message: 'CSRF token válido — Double Submit Cookie verificado',
+      received: body,
+      tip: 'Primero GET /csrf-token, luego POST con x-csrf-token header',
+    };
   }
 
   // ── CORS ──────────────────────────────────────────────────────────────────

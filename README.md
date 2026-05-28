@@ -4,9 +4,9 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
 ![NestJS](https://img.shields.io/badge/NestJS-11.x-E0234E?logo=nestjs&logoColor=white)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
-![Guards](https://img.shields.io/badge/guards-31-blueviolet)
+![Guards](https://img.shields.io/badge/guards-32-blueviolet)
 
-31 guards NestJS listos para copiar — desde JWT básico hasta detección de bots y wallets cripto.
+32 guards NestJS listos para copiar — desde JWT básico hasta detección de bots y wallets cripto.
 
 **No es un paquete npm.** Encuentras el guard que necesitas, copias el archivo y lo adaptas.
 
@@ -25,7 +25,7 @@ El flujo es siempre el mismo, sin importar cuál elijas:
 getOrders() { ... }
 ```
 
-Los otros 29 guards funcionan igual. Elige uno, ignora el resto.
+Los otros 30 guards funcionan igual. Elige uno, ignora el resto.
 
 ---
 
@@ -77,21 +77,22 @@ curl -X POST http://localhost:3000/auth/login \
 | 14 | Security | `ContentTypeGuard` | `POST /demo/level2/content-type` |
 | 15 | Security | `CorsGuard` | `GET /demo/level2/cors` |
 | 16 | Security | `TimingAttackGuard` | `POST /demo/level2/timing-fast` |
-| 17 | Rate Limit | `SlidingWindowRateLimitGuard` | `GET /demo/level3/sliding-window` |
-| 18 | Rate Limit | `AdaptiveRateLimitGuard` | `GET /demo/level3/adaptive` |
-| 19 | Rate Limit | `CircuitBreakerGuard` | `GET /demo/level3/circuit-breaker` |
-| 20 | Detection | `BotDetectionGuard` | `GET /demo/level4/bot-check` |
-| 21 | Detection | `GeoIpGuard` | `GET /demo/level4/geo` |
-| 22 | Detection | `DeviceFingerprintGuard` | `GET /demo/level4/fingerprint` |
-| 23 | Detection | `AnomalyDetectionGuard` | `GET /demo/level4/anomaly` |
-| 24 | Business | `SubscriptionGuard` | `GET /demo/level5/pro-feature` |
-| 25 | Business | `TimeBasedAccessGuard` | `GET /demo/level5/office-hours` |
-| 26 | Business | `TenantGuard` | `GET /demo/level5/:tenantId/data` |
-| 27 | Business | `MfaGuard` | `POST /demo/level5/sensitive-action` |
-| 28 | Web3 | `WalletSignatureGuard` | `POST /demo/level6/wallet-action` |
-| 29 | Web3 | `SuspiciousTransactionGuard` | `POST /demo/level6/withdraw` |
-| 30 | Web3 | `TokenHolderGuard` | `GET /demo/level6/token-gate` |
-| 31 | Web3 | `ChainIdGuard` | `POST /demo/level6/swap` |
+| 17 | Security | `CsrfGuard` | `POST /demo/level2/csrf-protected` |
+| 18 | Rate Limit | `SlidingWindowRateLimitGuard` | `GET /demo/level3/sliding-window` |
+| 19 | Rate Limit | `AdaptiveRateLimitGuard` | `GET /demo/level3/adaptive` |
+| 20 | Rate Limit | `CircuitBreakerGuard` | `GET /demo/level3/circuit-breaker` |
+| 21 | Detection | `BotDetectionGuard` | `GET /demo/level4/bot-check` |
+| 22 | Detection | `GeoIpGuard` | `GET /demo/level4/geo` |
+| 23 | Detection | `DeviceFingerprintGuard` | `GET /demo/level4/fingerprint` |
+| 24 | Detection | `AnomalyDetectionGuard` | `GET /demo/level4/anomaly` |
+| 25 | Business | `SubscriptionGuard` | `GET /demo/level5/pro-feature` |
+| 26 | Business | `TimeBasedAccessGuard` | `GET /demo/level5/office-hours` |
+| 27 | Business | `TenantGuard` | `GET /demo/level5/:tenantId/data` |
+| 28 | Business | `MfaGuard` | `POST /demo/level5/sensitive-action` |
+| 29 | Web3 | `WalletSignatureGuard` | `POST /demo/level6/wallet-action` |
+| 30 | Web3 | `SuspiciousTransactionGuard` | `POST /demo/level6/withdraw` |
+| 31 | Web3 | `TokenHolderGuard` | `GET /demo/level6/token-gate` |
+| 32 | Web3 | `ChainIdGuard` | `POST /demo/level6/swap` |
 
 ---
 
@@ -101,7 +102,7 @@ curl -X POST http://localhost:3000/auth/login \
 |-----------|------|
 | Basic | [JWT](docs/guards/basic/jwt-auth.md) · [Roles](docs/guards/basic/roles.md) · [Permissions](docs/guards/basic/permissions.md) · [ApiKey](docs/guards/basic/api-key.md) · [BasicAuth](docs/guards/basic/basic-auth.md) |
 | Basic+ | [Ownership](docs/guards/basic/ownership.md) · [Signature](docs/guards/basic/signature.md) · [Idempotency](docs/guards/basic/idempotency.md) · [Nonce](docs/guards/basic/nonce.md) · [Concurrency](docs/guards/basic/concurrency.md) |
-| Security | [IP/CIDR](docs/guards/security/ip.md) · [HTTPS](docs/guards/security/https-only.md) · [RequestSize](docs/guards/security/request-size.md) · [ContentType](docs/guards/security/content-type.md) · [CORS](docs/guards/security/cors.md) · [TimingAttack](docs/guards/security/timing-attack.md) |
+| Security | [IP/CIDR](docs/guards/security/ip.md) · [HTTPS](docs/guards/security/https-only.md) · [RequestSize](docs/guards/security/request-size.md) · [ContentType](docs/guards/security/content-type.md) · [CORS](docs/guards/security/cors.md) · [TimingAttack](docs/guards/security/timing-attack.md) · [CSRF](docs/guards/security/csrf.md) |
 | Rate Limit | [SlidingWindow](docs/guards/rate-limit/sliding-window.md) · [Adaptive](docs/guards/rate-limit/adaptive.md) · [CircuitBreaker](docs/guards/rate-limit/circuit-breaker.md) |
 | Detection | [BotDetection](docs/guards/detection/bot-detection.md) · [GeoIP](docs/guards/detection/geo-ip.md) · [DeviceFingerprint](docs/guards/detection/device-fingerprint.md) · [Anomaly](docs/guards/detection/anomaly-detection.md) |
 | Business | [Subscription](docs/guards/business/subscription.md) · [TimeAccess](docs/guards/business/time-access.md) · [Tenant](docs/guards/business/tenant.md) · [MFA](docs/guards/business/mfa.md) |
@@ -128,7 +129,7 @@ Cada capa es opcional. Usas solo las que necesita tu endpoint.
 src/
 ├── guards/
 │   ├── basic/        # JWT, Roles, Perms, ApiKey, BasicAuth, Ownership, Signature, Idempotency, Nonce, Concurrency
-│   ├── security/     # IP, HTTPS, RequestSize, ContentType, CORS, TimingAttack
+│   ├── security/     # IP, HTTPS, RequestSize, ContentType, CORS, TimingAttack, CSRF
 │   ├── rate-limit/   # SlidingWindow, Adaptive, CircuitBreaker
 │   ├── detection/    # BotDetection, GeoIP, DeviceFingerprint, Anomaly
 │   ├── business/     # Subscription, TimeAccess, Tenant, MFA
@@ -168,6 +169,7 @@ npm run test:request-size    # RequestSizeGuard
 npm run test:content-type    # ContentTypeGuard
 npm run test:cors            # CorsGuard
 npm run test:timing-attack   # TimingAttackGuard
+npm run test:csrf            # CsrfGuard
 ```
 
 </details>

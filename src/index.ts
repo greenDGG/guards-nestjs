@@ -39,6 +39,8 @@ export { CorsGuard } from './guards/security/cors.guard';
 export type { CorsGuardOptions } from './guards/security/cors.guard';
 export { TimingAttackGuard, TimingAttackInterceptor } from './guards/security/timing-attack.guard';
 export type { TimingAttackOptions } from './guards/security/timing-attack.guard';
+export { CsrfGuard, generateCsrfToken } from './guards/security/csrf.guard';
+export type { CsrfOptions } from './guards/security/csrf.guard';
 
 // ─── Level 3: Rate Limiting Guards ───────────────────────────────────────────
 export { SlidingWindowRateLimitGuard } from './guards/rate-limit/sliding-window-rate-limit.guard';
@@ -138,6 +140,7 @@ export {
   NonceMissingException,
   NonceInvalidException,
   ConcurrencyLimitException,
+  CsrfTokenException,
 } from './exceptions/security.exception';
 export {
   BotDetectedException,
