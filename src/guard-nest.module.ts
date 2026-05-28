@@ -30,6 +30,7 @@ import { CsrfGuard } from './guards/security/csrf.guard';
 import { ReplayProtectionGuard } from './guards/basic/replay-protection.guard';
 import { AuditLogInterceptor } from './guards/basic/audit-log.interceptor';
 import { RiskScoreGuard } from './guards/detection/risk-score.guard';
+import { SessionHijackGuard } from './guards/detection/session-hijack.guard';
 import { AUTH_CONSTANTS } from './constants/auth.constants';
 
 export interface GuardNestModuleOptions {
@@ -69,6 +70,7 @@ const ALL_SERVICES = [
   ReplayProtectionGuard,
   AuditLogInterceptor,
   RiskScoreGuard,
+  SessionHijackGuard,
   IdempotencyInterceptor,
   ConcurrencyInterceptor,
 ];

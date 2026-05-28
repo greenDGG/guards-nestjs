@@ -51,6 +51,10 @@ export { RiskScoreGuard } from './guards/detection/risk-score.guard';
 export type { RiskBreakdown } from './guards/detection/risk-score.guard';
 export { RiskScore } from './decorators/risk-score.decorator';
 export type { RiskScoreOptions, RiskWeights } from './decorators/risk-score.decorator';
+export { SessionHijackGuard } from './guards/detection/session-hijack.guard';
+export type { HijackBreakdown } from './guards/detection/session-hijack.guard';
+export { SessionProtect } from './decorators/session-hijack.decorator';
+export type { SessionHijackOptions } from './decorators/session-hijack.decorator';
 
 // ─── Level 3: Rate Limiting Guards ───────────────────────────────────────────
 export { SlidingWindowRateLimitGuard } from './guards/rate-limit/sliding-window-rate-limit.guard';
@@ -156,6 +160,7 @@ export {
   BotDetectedException,
   GeoIpBlockedException,
   FingerprintChangedException,
+  SessionHijackedException,
   RiskScoreBlockedException,
   RiskScoreChallengeException,
   CircuitOpenException,

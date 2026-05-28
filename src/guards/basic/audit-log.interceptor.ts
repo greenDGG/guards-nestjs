@@ -102,8 +102,8 @@ export class AuditLogInterceptor implements NestInterceptor {
 
     // ── Extract request context ───────────────────────────────────────────────
     const user      = request.user;
-    const userId    = user?.sub    ?? null;
-    const userEmail = (user as any)?.email ?? null;
+    const userId    = user?.sub    != null ? String(user.sub) : null;
+    const userEmail = (user as any)?.email != null ? String((user as any).email) : null;
     const roles     = user?.roles  ?? [];
 
     const ip = (

@@ -9,9 +9,11 @@ import { GeoIpGuard } from '../guards/detection/geo-ip.guard';
 import { DeviceFingerprintGuard } from '../guards/detection/device-fingerprint.guard';
 import { AnomalyDetectionGuard } from '../guards/detection/anomaly-detection.guard';
 import { RiskScoreGuard } from '../guards/detection/risk-score.guard';
+import { SessionHijackGuard } from '../guards/detection/session-hijack.guard';
 import { AdaptiveRateLimitGuard } from '../guards/rate-limit/adaptive-rate-limit.guard';
 import { AnomalyDetectionService } from '../services/anomaly-detection.service';
 import { RiskScore } from '../decorators/risk-score.decorator';
+import { SessionProtect } from '../decorators/session-hijack.decorator';
 import { GUARD_METADATA } from '../constants/guard.constants';
 
 /**
@@ -281,6 +283,38 @@ export class Level4DetectionController {
       riskScore:  (ctx as any)['riskScore'],
       riskAction: (ctx as any)['riskAction'],
       breakdown:  (ctx as any)['riskBreakdown'],
+    };
+  }
+
+  // ── Session Hijack — modo observación (no bloquea) ────────────────────────
+  // Requiere JWT. Llama la misma ruta desde distintos IPs/User-Agents para
+  // ver cómo sube el X-Session-Risk. Re-login resetea la baseline.
+  @SetMetadata(IS_PUBLIC_KEY, false)
+  @Get('session-hijack')
+  @SessionProtect({ logOnly: true })
+  @UseGuards(SessionHijackGuard)
+  sessionHijackObserve(@CurrentUser() user: JwtPayload) {
+    return {
+      guard:   'SessionHijackGuard',
+      message: 'logOnly: true — señales registradas, nunca bloquea',
+      userId:  user.sub,
+      tip:     'Revisa los headers X-Session-Risk y X-Session-Action. Cambia el User-Agent entre requests para ver la señal ua-changed.',
+    };
+  }
+
+  // ── Session Hijack — modo estricto ────────────────────────────────────────
+  // warn >= 20, block >= 45 (defaults son 30/60).
+  // Simula un endpoint financiero sensible (transferencias, retiros).
+  @SetMetadata(IS_PUBLIC_KEY, false)
+  @Get('session-hijack-strict')
+  @SessionProtect({ thresholds: { warn: 20, block: 45 } })
+  @UseGuards(SessionHijackGuard)
+  sessionHijackStrict(@CurrentUser() user: JwtPayload) {
+    return {
+      guard:   'SessionHijackGuard (estricto)',
+      message: 'warn>=20, block>=45 — umbrales reducidos para operaciones sensibles',
+      userId:  user.sub,
+      tip:     'Un cambio de User-Agent (35 pts) ya supera el umbral de bloqueo.',
     };
   }
 }

@@ -1,4 +1,4 @@
-import { ForbiddenException, ServiceUnavailableException } from '@nestjs/common';
+import { ForbiddenException, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
 
 export class BotDetectedException extends ForbiddenException {
   constructor(score: number) {
@@ -18,6 +18,17 @@ export class FingerprintChangedException extends ForbiddenException {
   constructor() {
     super('Device fingerprint mismatch detected. Session may have been compromised.');
     this.name = 'FingerprintChangedException';
+  }
+}
+
+export class SessionHijackedException extends UnauthorizedException {
+  constructor(score: number, breakdown: Record<string, unknown>) {
+    super({
+      message: 'Session security violation detected. Please re-authenticate.',
+      score,
+      breakdown,
+    });
+    this.name = 'SessionHijackedException';
   }
 }
 

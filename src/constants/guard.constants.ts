@@ -9,6 +9,7 @@ export const GUARD_METADATA = {
   REPLAY_PROTECTION_OPTIONS: 'guardNest:replayProtection:options',
   AUDIT_LOG_OPTIONS: 'guardNest:auditLog:options',
   RISK_SCORE_OPTIONS: 'guardNest:riskScore:options',
+  SESSION_HIJACK_OPTIONS: 'guardNest:sessionHijack:options',
   CONCURRENCY_OPTIONS: 'guardNest:concurrency:options',
   // Security
   IP_OPTIONS: 'guardNest:ip:options',

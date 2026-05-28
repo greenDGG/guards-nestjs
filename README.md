@@ -4,9 +4,9 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
 ![NestJS](https://img.shields.io/badge/NestJS-11.x-E0234E?logo=nestjs&logoColor=white)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
-![Guards](https://img.shields.io/badge/guards-35-blueviolet)
+![Guards](https://img.shields.io/badge/guards-36-blueviolet)
 
-35 guards NestJS listos para copiar — desde JWT básico hasta detección de bots y wallets cripto.
+36 guards NestJS listos para copiar — desde JWT básico hasta detección de bots y wallets cripto.
 
 **No es un paquete npm.** Encuentras el guard que necesitas, copias el archivo y lo adaptas.
 
@@ -25,7 +25,7 @@ El flujo es siempre el mismo, sin importar cuál elijas:
 getOrders() { ... }
 ```
 
-Los otros 33 guards funcionan igual. Elige uno, ignora el resto.
+Los otros 34 guards funcionan igual. Elige uno, ignora el resto.
 
 ---
 
@@ -88,14 +88,15 @@ curl -X POST http://localhost:3000/auth/login \
 | 25 | Detection | `DeviceFingerprintGuard` | `GET /demo/level4/fingerprint` |
 | 26 | Detection | `AnomalyDetectionGuard` | `GET /demo/level4/anomaly` |
 | 27 | Detection | `RiskScoreGuard` | `GET /demo/level4/risk-score` |
-| 28 | Business | `SubscriptionGuard` | `GET /demo/level5/pro-feature` |
-| 29 | Business | `TimeBasedAccessGuard` | `GET /demo/level5/office-hours` |
-| 30 | Business | `TenantGuard` | `GET /demo/level5/:tenantId/data` |
-| 31 | Business | `MfaGuard` | `POST /demo/level5/sensitive-action` |
-| 32 | Web3 | `WalletSignatureGuard` | `POST /demo/level6/wallet-action` |
-| 33 | Web3 | `SuspiciousTransactionGuard` | `POST /demo/level6/withdraw` |
-| 34 | Web3 | `TokenHolderGuard` | `GET /demo/level6/token-gate` |
-| 35 | Web3 | `ChainIdGuard` | `POST /demo/level6/swap` |
+| 28 | Detection | `SessionHijackGuard` | `GET /demo/level4/session-hijack` |
+| 29 | Business | `SubscriptionGuard` | `GET /demo/level5/pro-feature` |
+| 30 | Business | `TimeBasedAccessGuard` | `GET /demo/level5/office-hours` |
+| 31 | Business | `TenantGuard` | `GET /demo/level5/:tenantId/data` |
+| 32 | Business | `MfaGuard` | `POST /demo/level5/sensitive-action` |
+| 33 | Web3 | `WalletSignatureGuard` | `POST /demo/level6/wallet-action` |
+| 34 | Web3 | `SuspiciousTransactionGuard` | `POST /demo/level6/withdraw` |
+| 35 | Web3 | `TokenHolderGuard` | `GET /demo/level6/token-gate` |
+| 36 | Web3 | `ChainIdGuard` | `POST /demo/level6/swap` |
 
 ---
 
@@ -107,7 +108,7 @@ curl -X POST http://localhost:3000/auth/login \
 | Basic+ | [Ownership](docs/guards/basic/ownership.md) · [Signature](docs/guards/basic/signature.md) · [Idempotency](docs/guards/basic/idempotency.md) · [Nonce](docs/guards/basic/nonce.md) · [Concurrency](docs/guards/basic/concurrency.md) · [ReplayProtection](docs/guards/basic/replay-protection.md) · [AuditLog](docs/guards/basic/audit-log.md) |
 | Security | [IP/CIDR](docs/guards/security/ip.md) · [HTTPS](docs/guards/security/https-only.md) · [RequestSize](docs/guards/security/request-size.md) · [ContentType](docs/guards/security/content-type.md) · [CORS](docs/guards/security/cors.md) · [TimingAttack](docs/guards/security/timing-attack.md) · [CSRF](docs/guards/security/csrf.md) |
 | Rate Limit | [SlidingWindow](docs/guards/rate-limit/sliding-window.md) · [Adaptive](docs/guards/rate-limit/adaptive.md) · [CircuitBreaker](docs/guards/rate-limit/circuit-breaker.md) |
-| Detection | [BotDetection](docs/guards/detection/bot-detection.md) · [GeoIP](docs/guards/detection/geo-ip.md) · [DeviceFingerprint](docs/guards/detection/device-fingerprint.md) · [Anomaly](docs/guards/detection/anomaly-detection.md) · [RiskScore](docs/guards/detection/risk-score.md) |
+| Detection | [BotDetection](docs/guards/detection/bot-detection.md) · [GeoIP](docs/guards/detection/geo-ip.md) · [DeviceFingerprint](docs/guards/detection/device-fingerprint.md) · [Anomaly](docs/guards/detection/anomaly-detection.md) · [RiskScore](docs/guards/detection/risk-score.md) · [SessionHijack](docs/guards/detection/session-hijack.md) |
 | Business | [Subscription](docs/guards/business/subscription.md) · [TimeAccess](docs/guards/business/time-access.md) · [Tenant](docs/guards/business/tenant.md) · [MFA](docs/guards/business/mfa.md) |
 | Web3 | [WalletSignature](docs/guards/web3/wallet-signature.md) · [SuspiciousTx](docs/guards/web3/suspicious-transaction.md) · [TokenHolder](docs/guards/web3/token-holder.md) · [ChainId](docs/guards/web3/chain-id.md) |
 
@@ -176,6 +177,7 @@ npm run test:csrf               # CsrfGuard
 npm run test:replay-protection  # ReplayProtectionGuard
 npm run test:audit-log          # AuditLogInterceptor
 npm run test:risk-score         # RiskScoreGuard
+npm run test:session-hijack     # SessionHijackGuard
 ```
 
 </details>

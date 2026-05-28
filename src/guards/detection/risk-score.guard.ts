@@ -23,6 +23,7 @@ export interface RiskBreakdown {
   velocity:    number;
   fingerprint: number;
   total:       number;
+  [key: string]: number;
 }
 
 /**

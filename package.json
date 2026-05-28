@@ -50,7 +50,8 @@
     "test:csrf": "ts-node scripts/test-csrf.ts",
     "test:replay-protection": "ts-node scripts/test-replay-protection.ts",
     "test:audit-log": "ts-node scripts/test-audit-log.ts",
-    "test:risk-score": "ts-node scripts/test-risk-score.ts"
+    "test:risk-score": "ts-node scripts/test-risk-score.ts",
+    "test:session-hijack": "ts-node scripts/test-session-hijack.ts"
   },
   "keywords": ["nestjs", "guards", "jwt", "roles", "permissions", "authentication", "authorization"],
   "dependencies": {
