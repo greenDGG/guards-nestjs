@@ -76,6 +76,64 @@ curl -X POST http://localhost:3000/auth/login \
 
 ---
 
+## Pipeline
+
+Orden típico de guards en una request real. Cada capa puede cortocircuitar antes de llegar a la siguiente.
+
+```
+                         HTTP Request
+                              │
+         ┌────────────────────▼────────────────────┐
+         │         NETWORK SECURITY  (Lv 2)         │
+         │  IpGuard · HttpsOnly · RequestSize       ├──► 403 / 413
+         │  ContentType · CORS · TimingAttack†      │
+         └────────────────────┬────────────────────┘
+                              │
+         ┌────────────────────▼────────────────────┐
+         │           RATE LIMITING  (Lv 3)          │
+         │  SlidingWindowRateLimit · Adaptive       ├──► 429
+         │  CircuitBreaker                          ├──► 503
+         └────────────────────┬────────────────────┘
+                              │
+         ┌────────────────────▼────────────────────┐
+         │             DETECTION  (Lv 4)            │
+         │  BotDetection · GeoIP · Fingerprint      ├──► 403
+         │  AnomalyDetection  →  adjusts trust      │
+         └────────────────────┬────────────────────┘
+                              │
+         ┌────────────────────▼────────────────────┐
+         │           AUTHENTICATION  (Lv 1)         │
+         │  JWT · ApiKey · BasicAuth                ├──► 401
+         │  WalletSignature                         │
+         └────────────────────┬────────────────────┘
+                              │
+         ┌────────────────────▼────────────────────┐
+         │           AUTHORIZATION  (Lv 1)          │
+         │  Roles · Permissions · Ownership         ├──► 403
+         │  Tenant                                  │
+         └────────────────────┬────────────────────┘
+                              │
+         ┌────────────────────▼────────────────────┐
+         │          BUSINESS RULES  (Lv 5-6)        │
+         │  Subscription · MFA · TimeAccess         ├──► 403
+         │  ChainId · TokenHolder · SuspiciousTx    │
+         └────────────────────┬────────────────────┘
+                              │
+         ┌────────────────────▼────────────────────┐
+         │         HANDLER  +  INTERCEPTORS         │
+         │  Nonce · Signature · Concurrency         │
+         │  Idempotency                             │
+         │  CircuitBreakerInterceptor†              │
+         │  TimingAttackInterceptor†                │
+         └────────────────────┬────────────────────┘
+                              │
+                         HTTP Response
+
+† companion interceptor — registra el resultado después del handler
+```
+
+---
+
 ## Arquitectura
 
 ```
