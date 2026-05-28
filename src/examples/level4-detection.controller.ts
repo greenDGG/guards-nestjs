@@ -120,6 +120,21 @@ export class Level4DetectionController {
     };
   }
 
+  // ── GeoIP — fallbackAllow: false (local/unknown IP → 403) ────────────────
+  @Get('geo-strict')
+  @SetMetadata(GUARD_METADATA.GEO_IP_OPTIONS, {
+    mode: 'whitelist',
+    countries: ['MX', 'US', 'ES'],
+    fallbackAllow: false,
+  })
+  @UseGuards(GeoIpGuard)
+  geoStrict() {
+    return {
+      guard: 'GeoIpGuard (strict, fallbackAllow: false)',
+      message: 'País verificado y permitido',
+    };
+  }
+
   // ── Device Fingerprint — block on mismatch ────────────────────────────────
   @SetMetadata(IS_PUBLIC_KEY, false)
   @Get('fingerprint')
