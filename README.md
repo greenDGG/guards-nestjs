@@ -4,7 +4,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
 ![NestJS](https://img.shields.io/badge/NestJS-11.x-E0234E?logo=nestjs&logoColor=white)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
-![Guards](https://img.shields.io/badge/guards-20-blueviolet)
+![Guards](https://img.shields.io/badge/guards-30-blueviolet)
 
 Colección de guards NestJS de referencia — desde autenticación básica hasta detección de bots y análisis de wallets cripto.
 
