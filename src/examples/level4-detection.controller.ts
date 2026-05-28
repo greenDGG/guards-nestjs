@@ -8,8 +8,10 @@ import { BotDetectionGuard } from '../guards/detection/bot-detection.guard';
 import { GeoIpGuard } from '../guards/detection/geo-ip.guard';
 import { DeviceFingerprintGuard } from '../guards/detection/device-fingerprint.guard';
 import { AnomalyDetectionGuard } from '../guards/detection/anomaly-detection.guard';
+import { RiskScoreGuard } from '../guards/detection/risk-score.guard';
 import { AdaptiveRateLimitGuard } from '../guards/rate-limit/adaptive-rate-limit.guard';
 import { AnomalyDetectionService } from '../services/anomaly-detection.service';
+import { RiskScore } from '../decorators/risk-score.decorator';
 import { GUARD_METADATA } from '../constants/guard.constants';
 
 /**
@@ -242,6 +244,43 @@ export class Level4DetectionController {
         userId:            ctx.userId,
         roles:             ctx.roles,
       },
+    };
+  }
+
+  // ── Risk Score — agregador de señales (Stripe / Cloudflare style) ─────────
+  //
+  // Combina en un solo score: bot + geo + trust + velocity + fingerprint
+  // y decide: allow (0–39) / challenge (40–69) / block (70–100)
+  //
+  // Standalone: RiskScoreGuard llama los servicios internamente.
+  // Compuesto (más eficiente): BotDetectionGuard y GeoIpGuard corren primero
+  //   y escriben sus scores en securityContext — RiskScoreGuard los reutiliza.
+  //
+  // logOnly: true → observa scores sin bloquear (útil en ramp)
+  @Get('risk-score')
+  @RiskScore({ logOnly: true })
+  @UseGuards(RiskScoreGuard)
+  riskScoreObserve(@SecurityCtx() ctx: SecurityContext) {
+    return {
+      guard:      'RiskScoreGuard',
+      message:    'logOnly: true — score calculado, no se bloquea',
+      riskScore:  (ctx as any)['riskScore'],
+      riskAction: (ctx as any)['riskAction'],
+      breakdown:  (ctx as any)['riskBreakdown'],
+      tip:        'X-Risk-Score y X-Risk-Action en los response headers',
+    };
+  }
+
+  @Get('risk-score-strict')
+  @RiskScore({ thresholds: { challenge: 40, block: 70 }, onChallenge: 'throw' })
+  @UseGuards(BotDetectionGuard, GeoIpGuard, RiskScoreGuard)
+  riskScoreStrict(@SecurityCtx() ctx: SecurityContext) {
+    return {
+      guard:      'RiskScoreGuard',
+      message:    'Pasó todos los controles — riesgo bajo',
+      riskScore:  (ctx as any)['riskScore'],
+      riskAction: (ctx as any)['riskAction'],
+      breakdown:  (ctx as any)['riskBreakdown'],
     };
   }
 }

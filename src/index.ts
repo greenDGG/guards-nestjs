@@ -47,6 +47,10 @@ export type { ReplayProtectionOptions } from './decorators/replay-protection.dec
 export { AuditLogInterceptor } from './guards/basic/audit-log.interceptor';
 export { AuditLog } from './decorators/audit-log.decorator';
 export type { AuditLogOptions, AuditEntry } from './decorators/audit-log.decorator';
+export { RiskScoreGuard } from './guards/detection/risk-score.guard';
+export type { RiskBreakdown } from './guards/detection/risk-score.guard';
+export { RiskScore } from './decorators/risk-score.decorator';
+export type { RiskScoreOptions, RiskWeights } from './decorators/risk-score.decorator';
 
 // ─── Level 3: Rate Limiting Guards ───────────────────────────────────────────
 export { SlidingWindowRateLimitGuard } from './guards/rate-limit/sliding-window-rate-limit.guard';
@@ -152,6 +156,8 @@ export {
   BotDetectedException,
   GeoIpBlockedException,
   FingerprintChangedException,
+  RiskScoreBlockedException,
+  RiskScoreChallengeException,
   CircuitOpenException,
 } from './exceptions/detection.exception';
 export {

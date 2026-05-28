@@ -21,6 +21,30 @@ export class FingerprintChangedException extends ForbiddenException {
   }
 }
 
+export class RiskScoreBlockedException extends ForbiddenException {
+  constructor(score: number, breakdown: Record<string, number>) {
+    super({
+      message: `Request blocked: risk score ${score}/100 exceeds threshold`,
+      score,
+      breakdown,
+      action: 'block',
+    });
+    this.name = 'RiskScoreBlockedException';
+  }
+}
+
+export class RiskScoreChallengeException extends ForbiddenException {
+  constructor(score: number, breakdown: Record<string, number>) {
+    super({
+      message: `Request requires additional verification: risk score ${score}/100`,
+      score,
+      breakdown,
+      action: 'challenge',
+    });
+    this.name = 'RiskScoreChallengeException';
+  }
+}
+
 export class CircuitOpenException extends ServiceUnavailableException {
   public readonly retryAfter: number;
   constructor(serviceKey: string, retryAfterMs: number) {
