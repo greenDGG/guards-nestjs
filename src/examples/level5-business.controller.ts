@@ -110,8 +110,10 @@ export class Level5BusinessController {
     return { guard: 'TimeBasedAccessGuard', message: 'Pasaste la ventana de 1 minuto' };
   }
 
-  // ── Tenant — aislamiento multi-tenant ─────────────────────────────────────
-  // El tenantId del JWT debe coincidir con el :tenantId de la URL
+  // ── Tenant — aislamiento multi-tenant (strict: false) ───────────────────
+  // El tenantId del JWT debe coincidir con el :tenantId de la URL.
+  // strict: false → si no hay tenantId en el JWT, el guard pasa igual.
+  // Ejecuta: npx ts-node scripts/test-tenant.ts
   @Get('tenant/:tenantId/data')
   @SetMetadata(GUARD_METADATA.TENANT_OPTIONS, {
     tenantIdSources: ['param'],
@@ -121,10 +123,28 @@ export class Level5BusinessController {
   @UseGuards(TenantGuard)
   tenantData(@Param('tenantId') tenantId: string, @CurrentUser() user: JwtPayload) {
     return {
-      guard: 'TenantGuard',
+      guard: 'TenantGuard (strict: false)',
       message: 'Acceso al tenant autorizado',
       requestedTenant: tenantId,
       jwtTenant: (user as any).tenantId ?? '(no tenant en JWT)',
+    };
+  }
+
+  // ── Tenant — strict: true ─────────────────────────────────────────────────
+  // Sin tenantId en el JWT → 403 inmediato (no puede determinar el tenant del usuario)
+  @Get('tenant/:tenantId/strict-data')
+  @SetMetadata(GUARD_METADATA.TENANT_OPTIONS, {
+    tenantIdSources: ['param'],
+    paramName: 'tenantId',
+    strict: true,
+  })
+  @UseGuards(TenantGuard)
+  tenantStrictData(@Param('tenantId') tenantId: string, @CurrentUser() user: JwtPayload) {
+    return {
+      guard: 'TenantGuard (strict: true)',
+      message: 'Acceso al tenant autorizado — modo estricto',
+      requestedTenant: tenantId,
+      jwtTenant: (user as any).tenantId,
     };
   }
 

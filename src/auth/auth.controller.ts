@@ -39,6 +39,17 @@ export class AuthController {
     return { status: 'ok', message: 'Auth service is running', timestamp: new Date().toISOString() };
   }
 
+  // Genera un token con tenantId — solo para test scripts (no usar en producción)
+  @Public()
+  @Post('test/tenant-token')
+  @HttpCode(HttpStatus.OK)
+  async tenantTestToken(
+    @Body() body: { username: string; password: string; tenantId?: string | null },
+  ) {
+    const tid = typeof body.tenantId === 'string' ? body.tenantId : null;
+    return this.authService.loginWithTenant(body.username, body.password, tid);
+  }
+
   // Genera un token con subscriptionPlan — solo para test scripts (no usar en producción)
   @Public()
   @Post('test/subscription-token')

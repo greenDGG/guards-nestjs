@@ -107,6 +107,26 @@ export class AuthService {
     return MOCK_USERS[userId] || null;
   }
 
+  async loginWithTenant(
+    username: string,
+    password: string,
+    tenantId: string | null,
+  ): Promise<{ accessToken: string }> {
+    const user = await this.validateUser(username, password);
+    if (!user) throw new InvalidCredentialsException();
+
+    const payload: Partial<JwtPayload> = {
+      sub: user.id,
+      username: user.username,
+      email: user.email,
+      roles: user.roles,
+      permissions: user.permissions,
+      tenantId: tenantId ?? undefined,
+    };
+
+    return { accessToken: this.jwtService.signToken(payload) };
+  }
+
   async loginWithSubscription(
     username: string,
     password: string,
