@@ -8,13 +8,24 @@
 
 30 guards NestJS listos para copiar — desde JWT básico hasta detección de bots y wallets cripto.
 
-**No es un paquete npm.** Encuentras el guard que necesitas, copias el archivo y lo adaptas. Nada más.
+**No es un paquete npm.** Encuentras el guard que necesitas, copias el archivo y lo adaptas.
+
+El flujo es siempre el mismo, sin importar cuál elijas:
 
 ```
-Request → [guard que necesitas] → Controller
-                  ↓
-            401 / 403 / 429
+1. Elige un guard del catálogo
+2. Copia src/guards/…/nombre.guard.ts a tu proyecto
+3. Úsalo
 ```
+
+```typescript
+@SetMetadata(GUARD_METADATA.RATE_LIMIT_OPTIONS, { windowMs: 60_000, max: 10 })
+@UseGuards(SlidingWindowRateLimitGuard)
+@Get('orders')
+getOrders() { ... }
+```
+
+Los otros 29 guards funcionan igual. Elige uno, ignora el resto.
 
 ---
 
