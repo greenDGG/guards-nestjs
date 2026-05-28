@@ -14,6 +14,8 @@ import { CorsGuard } from '../guards/security/cors.guard';
 import { TimingAttackGuard, TimingAttackInterceptor } from '../guards/security/timing-attack.guard';
 import { CsrfGuard, generateCsrfToken } from '../guards/security/csrf.guard';
 import { SignatureGuard } from '../guards/basic/signature.guard';
+import { ReplayProtectionGuard } from '../guards/basic/replay-protection.guard';
+import { ReplayProtect } from '../decorators/replay-protection.decorator';
 import { IdempotencyInterceptor } from '../guards/basic/idempotency.interceptor';
 import { NonceGuard } from '../guards/basic/nonce.guard';
 import { ConcurrencyInterceptor } from '../guards/basic/concurrency.interceptor';
@@ -200,6 +202,30 @@ export class Level2SecurityController {
       guard: 'SignatureGuard (GitHub style)',
       message: 'Firma HMAC-SHA256 válida — sha256=body',
       received: body,
+    };
+  }
+
+  // ── Replay Protection — timestamp + nonce + signature en uno ────────────
+  // Secret: 'demo-replay-secret'
+  // Headers requeridos:
+  //   x-timestamp: <unix seconds>
+  //   x-nonce:     <hex aleatorio de 32 chars mínimo>
+  //   x-signature: HMAC-SHA256( `${timestamp}.${nonce}.${body}` )
+  //
+  // Diferencia vs SignatureGuard + NonceGuard separados:
+  //   el nonce es PARTE de la firma → no se puede reemplazar por uno fresco
+  //   sin romper la verificación de la firma.
+  //
+  // Ejecuta: npx ts-node scripts/test-replay-protection.ts
+  @Post('replay-protection')
+  @ReplayProtect({ secret: 'demo-replay-secret', maxAgeSeconds: 300 })
+  @UseGuards(ReplayProtectionGuard)
+  replayProtection(@Body() body: any) {
+    return {
+      guard: 'ReplayProtectionGuard',
+      message: 'timestamp + nonce + firma HMAC verificados',
+      received: body,
+      tip: 'Repite la request con el mismo x-nonce para ver el rechazo por replay',
     };
   }
 

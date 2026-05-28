@@ -41,6 +41,9 @@ export { TimingAttackGuard, TimingAttackInterceptor } from './guards/security/ti
 export type { TimingAttackOptions } from './guards/security/timing-attack.guard';
 export { CsrfGuard, generateCsrfToken } from './guards/security/csrf.guard';
 export type { CsrfOptions } from './guards/security/csrf.guard';
+export { ReplayProtectionGuard } from './guards/basic/replay-protection.guard';
+export { ReplayProtect } from './decorators/replay-protection.decorator';
+export type { ReplayProtectionOptions } from './decorators/replay-protection.decorator';
 
 // ─── Level 3: Rate Limiting Guards ───────────────────────────────────────────
 export { SlidingWindowRateLimitGuard } from './guards/rate-limit/sliding-window-rate-limit.guard';
