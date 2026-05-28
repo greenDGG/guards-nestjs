@@ -76,37 +76,24 @@ curl -X POST http://localhost:3000/auth/login \
 
 ---
 
-## Cómo funciona un guard
+## Cómo funciona
 
-Cada guard es un archivo independiente. Lo pegas en tu proyecto, lo registras y listo.
+**Vista simple** — la mayoría de endpoints solo necesitan esto:
 
 ```
-  Request
-     │
-     ▼
- ┌────────────┐   falla   ┌──────────────────────┐
- │  Tu guard  │ ─────────►│  401 / 403 / 429 ...  │
- └─────┬──────┘           └──────────────────────┘
-       │ pasa
-       ▼
-  Handler
-       │
-       ▼
-  Response
+Request → JwtAuthGuard → RolesGuard → Controller
+                ↓               ↓
+              401             403
 ```
 
-Los guards se apilan — usas solo los que necesitas:
+**Vista avanzada** — las capas disponibles, en orden recomendado:
 
-```typescript
-// webhook externo
-@UseGuards(ContentTypeGuard, IpGuard)
-
-// endpoint autenticado con rate limit
-@UseGuards(JwtAuthGuard, RolesGuard, SlidingWindowRateLimitGuard)
-
-// acción sensible Web3
-@UseGuards(WalletSignatureGuard, ChainIdGuard, TokenHolderGuard)
 ```
+Network → RateLimit → Detection → Auth → Roles → Business → Handler
+  (Lv 2)    (Lv 3)     (Lv 4)   (Lv 1)  (Lv 1)   (Lv 5-6)
+```
+
+Cada capa es opcional. Usas solo las que necesita tu endpoint.
 
 ---
 
