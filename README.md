@@ -6,9 +6,15 @@
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
 ![Guards](https://img.shields.io/badge/guards-30-blueviolet)
 
-Colección de guards NestJS de referencia — desde autenticación básica hasta detección de bots y análisis de wallets cripto.
+30 guards NestJS listos para copiar — desde JWT básico hasta detección de bots y wallets cripto.
 
-**No es un paquete npm.** Encuentras el guard que necesitas, copias el archivo a tu proyecto y lo adaptas. Nada más.
+**No es un paquete npm.** Encuentras el guard que necesitas, copias el archivo y lo adaptas. Nada más.
+
+```
+Request → [guard que necesitas] → Controller
+                  ↓
+            401 / 403 / 429
+```
 
 ---
 
@@ -17,15 +23,14 @@ Colección de guards NestJS de referencia — desde autenticación básica hasta
 ```bash
 git clone https://github.com/greenDGG/guards-nestjs.git
 cd guard-nest
-npm install
-cp .env.example .env
+npm install && cp .env.example .env
 npm run start:dev
 ```
 
-Servidor en `http://localhost:3000`. Cada nivel tiene un controller de demo listo para explorar.
+<details>
+<summary>Usuarios de prueba y login JWT</summary>
 
 ```bash
-# Login para obtener token JWT
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}'
@@ -37,12 +42,14 @@ curl -X POST http://localhost:3000/auth/login \
 | `user`  | `user123`  | user  |
 | `guest` | `guest123` | guest |
 
+</details>
+
 ---
 
-## Guards
+## Catálogo
 
-| # | Nivel | Guard | Demo endpoint |
-|---|-------|-------|---------------|
+| # | Categoría | Guard | Demo |
+|---|-----------|-------|------|
 | 1 | Basic | `JwtAuthGuard` | `GET /demo/level1/protected` |
 | 2 | Basic | `RolesGuard` | `GET /demo/level1/admin-only` |
 | 3 | Basic | `PermissionsGuard` | `GET /demo/level1/with-permissions` |
@@ -58,99 +65,26 @@ curl -X POST http://localhost:3000/auth/login \
 | 13 | Security | `RequestSizeGuard` | `POST /demo/level2/request-size` |
 | 14 | Security | `ContentTypeGuard` | `POST /demo/level2/content-type` |
 | 15 | Security | `CorsGuard` | `GET /demo/level2/cors` |
-| 16 | Rate Limit | `SlidingWindowRateLimitGuard` | `GET /demo/level3/sliding` |
-| 17 | Rate Limit | `AdaptiveRateLimitGuard` | `GET /demo/level3/adaptive` |
-| 18 | Rate Limit | `CircuitBreakerGuard` | `GET /demo/level3/circuit` |
-| 19 | Detection | `BotDetectionGuard` | `GET /demo/level4/bot-check` |
-| 20 | Detection | `GeoIpGuard` | `GET /demo/level4/geo` |
-| 21 | Detection | `DeviceFingerprintGuard` | `GET /demo/level4/fingerprint` |
-| 22 | Detection | `AnomalyDetectionGuard` | `GET /demo/level4/anomaly` |
-| 23 | Business | `SubscriptionGuard` | `GET /demo/level5/pro-feature` |
-| 24 | Business | `TimeBasedAccessGuard` | `GET /demo/level5/office-hours` |
-| 25 | Business | `TenantGuard` | `GET /demo/level5/:tenantId/data` |
-| 26 | Business | `MfaGuard` | `POST /demo/level5/sensitive-action` |
-| 27 | Web3 | `WalletSignatureGuard` | `POST /demo/level6/wallet-action` |
-| 28 | Web3 | `SuspiciousTransactionGuard` | `POST /demo/level6/withdraw` |
-| 29 | Web3 | `TokenHolderGuard` | `GET /demo/level6/token-gate` |
-| 30 | Web3 | `ChainIdGuard` | `POST /demo/level6/swap` |
+| 16 | Security | `TimingAttackGuard` | `POST /demo/level2/timing-fast` |
+| 17 | Rate Limit | `SlidingWindowRateLimitGuard` | `GET /demo/level3/sliding-window` |
+| 18 | Rate Limit | `AdaptiveRateLimitGuard` | `GET /demo/level3/adaptive` |
+| 19 | Rate Limit | `CircuitBreakerGuard` | `GET /demo/level3/circuit-breaker` |
+| 20 | Detection | `BotDetectionGuard` | `GET /demo/level4/bot-check` |
+| 21 | Detection | `GeoIpGuard` | `GET /demo/level4/geo` |
+| 22 | Detection | `DeviceFingerprintGuard` | `GET /demo/level4/fingerprint` |
+| 23 | Detection | `AnomalyDetectionGuard` | `GET /demo/level4/anomaly` |
+| 24 | Business | `SubscriptionGuard` | `GET /demo/level5/pro-feature` |
+| 25 | Business | `TimeBasedAccessGuard` | `GET /demo/level5/office-hours` |
+| 26 | Business | `TenantGuard` | `GET /demo/level5/:tenantId/data` |
+| 27 | Business | `MfaGuard` | `POST /demo/level5/sensitive-action` |
+| 28 | Web3 | `WalletSignatureGuard` | `POST /demo/level6/wallet-action` |
+| 29 | Web3 | `SuspiciousTransactionGuard` | `POST /demo/level6/withdraw` |
+| 30 | Web3 | `TokenHolderGuard` | `GET /demo/level6/token-gate` |
+| 31 | Web3 | `ChainIdGuard` | `POST /demo/level6/swap` |
 
 ---
 
-## Cómo funciona
-
-**Vista simple** — la mayoría de endpoints solo necesitan esto:
-
-```
-Request → JwtAuthGuard → RolesGuard → Controller
-                ↓               ↓
-              401             403
-```
-
-**Vista avanzada** — las capas disponibles, en orden recomendado:
-
-```
-Network → RateLimit → Detection → Auth → Roles → Business → Handler
-  (Lv 2)    (Lv 3)     (Lv 4)   (Lv 1)  (Lv 1)   (Lv 5-6)
-```
-
-Cada capa es opcional. Usas solo las que necesita tu endpoint.
-
----
-
-## Arquitectura
-
-```
-src/
-├── guards/
-│   ├── basic/        # JWT, Roles, Perms, ApiKey, BasicAuth, Ownership, Signature, Idempotency, Nonce, Concurrency
-│   ├── security/     # IP, HTTPS, RequestSize, ContentType, CORS
-│   ├── rate-limit/   # SlidingWindow, Adaptive, CircuitBreaker
-│   ├── detection/    # BotDetection, GeoIP, DeviceFingerprint, Anomaly
-│   ├── business/     # Subscription, TimeAccess, Tenant, MFA
-│   └── web3/         # WalletSignature, SuspiciousTx, TokenHolder, ChainId
-├── services/         # Shared: IpExtractor, RedisStore, BotDetection, GeoIp, Anomaly, Web3Rpc, Etherscan
-├── decorators/       # @Public, @Roles, @Owner, @Signature, @Idempotent, @Nonce, @Concurrent, ...
-├── exceptions/       # Typed exceptions per category
-├── interfaces/       # JwtPayload, SecurityContext, User, ...
-├── examples/         # Demo controllers (one per level)
-└── scripts/          # Test scripts (one per guard category)
-```
-
-### SecurityContext (opcional)
-
-Los guards de detección escriben sus resultados en `request.securityContext` para que los handlers los puedan leer. Si no usas esos guards, ignora esto por completo.
-
-```typescript
-// Solo disponible si usaste BotDetectionGuard, GeoIpGuard, etc.
-@Get('info')
-info(@SecurityCtx() ctx: SecurityContext) {
-  ctx.botScore        // BotDetectionGuard
-  ctx.geo             // GeoIpGuard
-  ctx.trustScore      // AdaptiveRateLimitGuard
-  ctx.deviceFingerprint // DeviceFingerprintGuard
-}
-```
-
----
-
-## Test Scripts
-
-```bash
-npm run test:normal        # happy path — todos los niveles
-npm run test:bot           # BotDetectionGuard — 14 casos
-npm run test:rate-limit    # SlidingWindow + CircuitBreaker
-npm run test:signature     # HMAC Signature — Stripe y GitHub style
-npm run test:idempotency   # IdempotencyInterceptor — 5 escenarios
-npm run test:nonce         # NonceGuard — replay attacks
-npm run test:concurrency   # ConcurrencyInterceptor — race conditions
-npm run test:web3          # WalletSignature — flujo completo EIP-191
-```
-
----
-
-## Documentación por guard
-
-Cada guard tiene su propia doc en `docs/`:
+## Documentación
 
 | Categoría | Docs |
 |-----------|------|
@@ -161,7 +95,71 @@ Cada guard tiene su propia doc en `docs/`:
 | Detection | [BotDetection](docs/guards/detection/bot-detection.md) · [GeoIP](docs/guards/detection/geo-ip.md) · [DeviceFingerprint](docs/guards/detection/device-fingerprint.md) · [Anomaly](docs/guards/detection/anomaly-detection.md) |
 | Business | [Subscription](docs/guards/business/subscription.md) · [TimeAccess](docs/guards/business/time-access.md) · [Tenant](docs/guards/business/tenant.md) · [MFA](docs/guards/business/mfa.md) |
 | Web3 | [WalletSignature](docs/guards/web3/wallet-signature.md) · [SuspiciousTx](docs/guards/web3/suspicious-transaction.md) · [TokenHolder](docs/guards/web3/token-holder.md) · [ChainId](docs/guards/web3/chain-id.md) |
-| Services | [RedisStore](docs/services/redis-store.md) · [IpExtractor](docs/services/ip-extractor.md) · [SecurityContext](docs/services/security-context.md) |
+
+---
+
+<details>
+<summary>Capas disponibles (orden recomendado para stacking)</summary>
+
+```
+Network → RateLimit → Detection → Auth → Roles → Business → Handler
+  (Lv 2)    (Lv 3)     (Lv 4)   (Lv 1)  (Lv 1)   (Lv 5-6)
+```
+
+Cada capa es opcional. Usas solo las que necesita tu endpoint.
+
+</details>
+
+<details>
+<summary>Arquitectura del proyecto</summary>
+
+```
+src/
+├── guards/
+│   ├── basic/        # JWT, Roles, Perms, ApiKey, BasicAuth, Ownership, Signature, Idempotency, Nonce, Concurrency
+│   ├── security/     # IP, HTTPS, RequestSize, ContentType, CORS, TimingAttack
+│   ├── rate-limit/   # SlidingWindow, Adaptive, CircuitBreaker
+│   ├── detection/    # BotDetection, GeoIP, DeviceFingerprint, Anomaly
+│   ├── business/     # Subscription, TimeAccess, Tenant, MFA
+│   └── web3/         # WalletSignature, SuspiciousTx, TokenHolder, ChainId
+├── services/         # IpExtractor, RedisStore, BotDetection, GeoIp, Anomaly, Web3Rpc, Etherscan
+├── decorators/       # @Public, @Roles, @Owner, @Signature, @Idempotent, @Nonce, @Concurrent, ...
+├── exceptions/       # Typed exceptions per category
+├── examples/         # Demo controllers (one per level)
+└── scripts/          # Test scripts (one per guard)
+```
+
+Los guards de detección escriben en `request.securityContext` — accesible con `@SecurityCtx()`. Si no usas esos guards, ignora esto.
+
+</details>
+
+<details>
+<summary>Test scripts</summary>
+
+```bash
+npm run test:normal          # happy path — todos los niveles
+npm run test:bot             # BotDetectionGuard
+npm run test:rate-limit      # SlidingWindow + CircuitBreaker
+npm run test:sliding-window  # SlidingWindowRateLimitGuard
+npm run test:adaptive        # AdaptiveRateLimitGuard
+npm run test:circuit         # CircuitBreakerGuard
+npm run test:signature       # HMAC — Stripe y GitHub style
+npm run test:idempotency     # IdempotencyInterceptor
+npm run test:nonce           # replay attacks
+npm run test:concurrency     # race conditions
+npm run test:web3            # WalletSignature EIP-191
+npm run test:fingerprint     # DeviceFingerprintGuard
+npm run test:geo             # GeoIpGuard
+npm run test:anomaly         # AnomalyDetectionGuard
+npm run test:ip              # IpGuard CIDR
+npm run test:https-only      # HttpsOnlyGuard
+npm run test:request-size    # RequestSizeGuard
+npm run test:content-type    # ContentTypeGuard
+npm run test:cors            # CorsGuard
+npm run test:timing-attack   # TimingAttackGuard
+```
+
+</details>
 
 ---
 
