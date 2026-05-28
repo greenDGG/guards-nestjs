@@ -25,7 +25,7 @@ El flujo es siempre el mismo, sin importar cuál elijas:
 getOrders() { ... }
 ```
 
-Los otros 36 guards funcionan igual. Elige uno, ignora el resto.
+Los otros 38 guards funcionan igual. Elige uno, ignora el resto.
 
 ---
 
@@ -135,10 +135,10 @@ Cada capa es opcional. Usas solo las que necesita tu endpoint.
 ```
 src/
 ├── guards/
-│   ├── basic/        # JWT, Roles, Perms, ApiKey, BasicAuth, Ownership, Signature, Idempotency, Nonce, Concurrency
+│   ├── basic/        # JWT, Roles, Perms, ApiKey, BasicAuth, Ownership, Signature, Idempotency, Nonce, Concurrency, ReplayProtection, AuditLog
 │   ├── security/     # IP, HTTPS, RequestSize, ContentType, CORS, TimingAttack, CSRF, HeaderValidation, EmergencyLock
-│   ├── rate-limit/   # SlidingWindow, Adaptive, CircuitBreaker
-│   ├── detection/    # BotDetection, GeoIP, DeviceFingerprint, Anomaly
+│   ├── rate-limit/   # SlidingWindow, Adaptive, RateLimitByRoute, CircuitBreaker
+│   ├── detection/    # BotDetection, GeoIP, DeviceFingerprint, Anomaly, RiskScore, SessionHijack
 │   ├── business/     # Subscription, TimeAccess, Tenant, MFA
 │   └── web3/         # WalletSignature, SuspiciousTx, TokenHolder, ChainId
 ├── services/         # IpExtractor, RedisStore, BotDetection, GeoIp, Anomaly, Web3Rpc, Etherscan
