@@ -3,7 +3,6 @@ import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
 import { GUARD_METADATA } from '../../constants/guard.constants';
 import { RedisStoreService } from '../../services/redis-store.service';
-import { IpExtractorService } from '../../services/ip-extractor.service';
 import { SecurityContextService } from '../../services/security-context.service';
 import { RateLimitExceededException } from '../../exceptions/throttle.exception';
 
@@ -62,6 +61,17 @@ export interface AdaptiveRateLimitOptions {
    * @default 1
    */
   minLimit?: number;
+
+  /**
+   * Expose trust and bot scoring details in response headers.
+   *
+   * DEFAULT: false — hidden to prevent attackers from using the headers to
+   * calibrate their bots (they can read X-RateLimit-Trust-Score and know
+   * exactly how far they are from the next tier threshold).
+   *
+   * Enable only in development / internal dashboards.
+   */
+  exposeDebugHeaders?: boolean;
 }
 
 // ── Default tiers ──────────────────────────────────────────────────────────
@@ -144,7 +154,6 @@ export class AdaptiveRateLimitGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly store: RedisStoreService,
-    private readonly ipExtractor: IpExtractorService,
     private readonly secCtx: SecurityContextService,
   ) {}
 
@@ -190,23 +199,30 @@ export class AdaptiveRateLimitGuard implements CanActivate {
     const timestamps = raw.map(Number).filter((ts) => ts > windowStart);
     const count      = timestamps.length;
 
-    // ── Response headers (full transparency) ──────────────────────────────
+    // ── Response headers ──────────────────────────────────────────────────
 
     const resetIn = timestamps.length > 0
       ? Math.ceil((timestamps[timestamps.length - 1] + options.windowMs - now) / 1000)
       : Math.ceil(options.windowMs / 1000);
 
-    response.setHeader('X-RateLimit-Limit',              effectiveMax);
-    response.setHeader('X-RateLimit-Remaining',          Math.max(0, effectiveMax - count - 1));
-    response.setHeader('X-RateLimit-Reset',              resetIn);
-    response.setHeader('X-RateLimit-Base',               options.baseMax);
-    response.setHeader('X-RateLimit-Trust-Score',        trustScore);
-    response.setHeader('X-RateLimit-Trust-Tier',         trustTier.label);
-    response.setHeader('X-RateLimit-Trust-Multiplier',   trustTier.multiplier);
-    response.setHeader('X-RateLimit-Bot-Score',          botScore);
-    response.setHeader('X-RateLimit-Bot-Tier',           botTier.label);
-    response.setHeader('X-RateLimit-Bot-Multiplier',     botTier.multiplier);
-    response.setHeader('X-RateLimit-Multiplier',         combinedMultiplier.toFixed(4));
+    // Standard rate-limit headers — always present
+    response.setHeader('X-RateLimit-Limit',     effectiveMax);
+    response.setHeader('X-RateLimit-Remaining', Math.max(0, effectiveMax - count - 1));
+    response.setHeader('X-RateLimit-Reset',     resetIn);
+
+    // Debug headers — opt-in (exposeDebugHeaders: true).
+    // Hidden by default: attackers can use trust/bot score headers to calibrate
+    // their requests to stay just below the block threshold.
+    if (options.exposeDebugHeaders) {
+      response.setHeader('X-RateLimit-Base',             options.baseMax);
+      response.setHeader('X-RateLimit-Trust-Score',      trustScore);
+      response.setHeader('X-RateLimit-Trust-Tier',       trustTier.label);
+      response.setHeader('X-RateLimit-Trust-Multiplier', trustTier.multiplier);
+      response.setHeader('X-RateLimit-Bot-Score',        botScore);
+      response.setHeader('X-RateLimit-Bot-Tier',         botTier.label);
+      response.setHeader('X-RateLimit-Bot-Multiplier',   botTier.multiplier);
+      response.setHeader('X-RateLimit-Multiplier',       combinedMultiplier.toFixed(4));
+    }
 
     // ── Enforce limit ──────────────────────────────────────────────────────
 

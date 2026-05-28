@@ -35,6 +35,7 @@ import { RiskScoreGuard } from './guards/detection/risk-score.guard';
 import { SessionHijackGuard } from './guards/detection/session-hijack.guard';
 import { EmergencyLockService } from './services/emergency-lock.service';
 import { EmergencyLockGuard } from './guards/security/emergency-lock.guard';
+import { AnomalyDetectionInterceptor } from './guards/detection/anomaly-detection.guard';
 import { AUTH_CONSTANTS } from './constants/auth.constants';
 
 export interface GuardNestModuleOptions {
@@ -67,6 +68,7 @@ const ALL_SERVICES = [
   SecurityContextService,
   EmergencyLockService,
   EmergencyLockGuard,
+  AnomalyDetectionInterceptor,
   AdaptiveRateLimitGuard,
   RateLimitByRouteGuard,
   CircuitBreakerGuard,

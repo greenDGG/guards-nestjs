@@ -24,6 +24,16 @@ interface CircuitData {
   halfOpenAt?: number;
 }
 
+// Resolved options used by both guard and interceptor
+type ResolvedCircuitOptions = Required<Pick<CircuitBreakerOptions,
+  'failureThreshold' | 'successThreshold' | 'timeout' | 'rollingWindowMs'
+>>;
+
+// WeakMap eliminates request object mutation — no _circuitKey/_circuitOptions pollution.
+// Entries are automatically garbage-collected when the request is done.
+type CircuitRequestState = { key: string; options: ResolvedCircuitOptions };
+const circuitRequestStates = new WeakMap<object, CircuitRequestState>();
+
 /**
  * Level 3 — Circuit Breaker Guard
  *
@@ -95,24 +105,21 @@ export class CircuitBreakerGuard implements CanActivate {
       this.logger.log(`Circuit HALF_OPEN for '${options.serviceKey}'`);
     }
 
-    // Store the key in request so the interceptor can record outcome
-    const request = context.switchToHttp().getRequest();
-    request._circuitKey = storeKey;
-    request._circuitOptions = cfg;
-    request._circuitState = circuit;
+    // Pass state to the companion interceptor via WeakMap (avoids request mutation)
+    const request = context.switchToHttp().getRequest<object>();
+    circuitRequestStates.set(request, { key: storeKey, options: cfg });
 
     return true;
   }
 
-  async recordSuccess(storeKey: string, cfg: typeof CircuitBreakerGuard.prototype): Promise<void> {
+  async recordSuccess(storeKey: string, cfg: ResolvedCircuitOptions): Promise<void> {
     const raw = await this.store.get(storeKey);
     if (!raw) return;
     const circuit: CircuitData = JSON.parse(raw);
 
     if (circuit.state === 'HALF_OPEN') {
       circuit.successes++;
-      const threshold = (cfg as any).successThreshold ?? 2;
-      if (circuit.successes >= threshold) {
+      if (circuit.successes >= cfg.successThreshold) {
         circuit.state = 'CLOSED';
         circuit.failures = 0;
         circuit.successes = 0;
@@ -122,10 +129,10 @@ export class CircuitBreakerGuard implements CanActivate {
       circuit.failures = Math.max(0, circuit.failures - 1);
     }
 
-    await this.saveCircuit(storeKey, circuit, (cfg as any).rollingWindowMs ?? 60_000);
+    await this.saveCircuit(storeKey, circuit, cfg.rollingWindowMs);
   }
 
-  async recordFailure(storeKey: string, cfg: any): Promise<void> {
+  async recordFailure(storeKey: string, cfg: ResolvedCircuitOptions): Promise<void> {
     const raw = await this.store.get(storeKey);
     const circuit: CircuitData = raw ? JSON.parse(raw) : { state: 'CLOSED', failures: 0, successes: 0 };
 
@@ -138,7 +145,7 @@ export class CircuitBreakerGuard implements CanActivate {
       }
     }
 
-    await this.saveCircuit(storeKey, circuit, cfg.rollingWindowMs ?? 60_000);
+    await this.saveCircuit(storeKey, circuit, cfg.rollingWindowMs);
   }
 
   private async saveCircuit(key: string, data: CircuitData, ttlMs: number): Promise<void> {
@@ -161,16 +168,16 @@ export class CircuitBreakerInterceptor implements NestInterceptor {
   constructor(private readonly guard: CircuitBreakerGuard) {}
 
   intercept(_context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = _context.switchToHttp().getRequest();
-    const storeKey: string | undefined = request._circuitKey;
-    const cfg: any | undefined = request._circuitOptions;
+    const request = _context.switchToHttp().getRequest<object>();
+    const state = circuitRequestStates.get(request);
 
-    if (!storeKey || !cfg) return next.handle();
+    if (!state) return next.handle();
 
+    const { key, options } = state;
     return next.handle().pipe(
-      tap(() => from(this.guard.recordSuccess(storeKey, cfg))),
+      tap(() => from(this.guard.recordSuccess(key, options))),
       catchError((err: unknown) =>
-        from(this.guard.recordFailure(storeKey, cfg)).pipe(
+        from(this.guard.recordFailure(key, options)).pipe(
           switchMap(() => throwError(() => err)),
         ),
       ),

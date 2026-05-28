@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import type { IStore } from '../interfaces/store.interface';
 
 interface MemoryEntry {
   value: string;
@@ -12,14 +13,30 @@ interface ListEntry {
 
 /**
  * In-memory store that mimics Redis semantics.
- * Swap for a real Redis implementation (ioredis) in production multi-instance deployments.
  *
- * To use Redis: inject ioredis client and replace method bodies with redis calls.
+ * ⚠  SINGLE-INSTANCE ONLY.
+ * Guards that depend on shared state (rate limits, nonces, circuit breakers,
+ * token blacklists) will silently break in multi-instance deployments because
+ * each process maintains its own independent Map.
+ *
+ * For multi-instance: implement IStore backed by Redis (ioredis) and swap the
+ * provider in your module: { provide: RedisStoreService, useClass: MyRedisStore }
  */
 @Injectable()
-export class RedisStoreService {
+export class RedisStoreService implements IStore, OnModuleInit {
+  private readonly logger = new Logger(RedisStoreService.name);
   private store = new Map<string, MemoryEntry>();
   private listStore = new Map<string, ListEntry>();
+
+  onModuleInit(): void {
+    if (process.env.NODE_ENV === 'production') {
+      this.logger.warn(
+        'RedisStoreService is using an in-memory store. ' +
+        'This is NOT suitable for multi-instance production deployments. ' +
+        'Implement IStore backed by Redis and register it as a provider.',
+      );
+    }
+  }
 
   async get(key: string): Promise<string | null> {
     const entry = this.store.get(key);
@@ -92,11 +109,15 @@ export class RedisStoreService {
   async llen(key: string): Promise<number> {
     const entry = this.listStore.get(key);
     if (!entry) return 0;
+    if (entry.expiresAt && Date.now() > entry.expiresAt) {
+      this.listStore.delete(key);
+      return 0;
+    }
     return entry.values.length;
   }
 
   async exists(key: string): Promise<boolean> {
-    return (await this.get(key)) !== null || this.listStore.has(key);
+    return (await this.get(key)) !== null || (await this.llen(key)) > 0;
   }
 
   /**
@@ -124,7 +145,11 @@ export class RedisStoreService {
     return true;
   }
 
-  // Flush all in-memory state (useful for tests)
+  /**
+   * FOR TESTS ONLY — wipes all in-memory state.
+   * Never call this from production code: it clears rate limit counters,
+   * nonces, circuit breaker state, and trust scores for every active user.
+   */
   async flushAll(): Promise<void> {
     this.store.clear();
     this.listStore.clear();

@@ -40,7 +40,7 @@ const DEFAULT_WEIGHTS: BotSignalWeights = {
   honeypotFilled: 30,
 };
 
-// Known headless/automation UA patterns
+// Browser automation and scraping UA patterns — these never appear in real user traffic.
 const HEADLESS_PATTERNS = [
   /HeadlessChrome/i,
   /Puppeteer/i,
@@ -60,9 +60,17 @@ const HEADLESS_PATTERNS = [
   /libwww-perl/i,
   /ApacheBench/i,
   /okhttp/i,
-  /axios/i,
-  /node-fetch/i,
-  /node\.js/i,
+];
+
+// Generic HTTP client UAs — these are legitimate in server-to-server traffic
+// (microservices, CI pipelines, monitoring). NOT in HEADLESS_PATTERNS by default
+// to avoid false positives. Add to options.allowedBots if you want to whitelist
+// them explicitly, or exclude specific routes from bot detection.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const SERVER_CLIENT_PATTERNS = [
+  /axios\//i,       // axios HTTP client
+  /node-fetch\//i,  // node-fetch
+  /node\.js\//i,    // generic Node.js HTTP
 ];
 
 // Known good bots to whitelist by default

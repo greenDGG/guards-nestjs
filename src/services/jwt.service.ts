@@ -25,17 +25,15 @@ export class JwtService {
         ? expiresIn
         : parseInt(expiresIn || `${AUTH_CONSTANTS.JWT_EXPIRATION}`, 10);
 
-    return this.jwtService.sign(tokenPayload as any, {
-      secret: AUTH_CONSTANTS.JWT_SECRET,
-      expiresIn: exp,
-    });
+    // Do not pass `secret` here — use whatever GuardNestModule.forRoot({ jwt: { secret } })
+    // registered in JwtModule. Passing it explicitly would override forRoot() config.
+    return this.jwtService.sign(tokenPayload as any, { expiresIn: exp });
   }
 
   async verifyToken(token: string): Promise<JwtPayload> {
     try {
-      return await this.jwtService.verifyAsync(token, {
-        secret: AUTH_CONSTANTS.JWT_SECRET,
-      });
+      // No explicit secret — use JwtModule-registered secret (from forRoot() config).
+      return await this.jwtService.verifyAsync(token);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Token verification failed: ${errorMessage}`);

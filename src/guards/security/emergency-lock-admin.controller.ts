@@ -10,6 +10,7 @@ import {
   Post,
   UnauthorizedException,
 } from '@nestjs/common';
+import { timingSafeEqual } from 'crypto';
 import { Public } from '../../decorators/public.decorator';
 import { EmergencyLockService } from '../../services/emergency-lock.service';
 
@@ -44,7 +45,12 @@ export class EmergencyLockAdminController {
         'Emergency lock admin is disabled — set EMERGENCY_LOCK_ADMIN_KEY to enable',
       );
     }
-    if (!adminKey || adminKey !== expected) {
+    if (!adminKey) throw new UnauthorizedException('x-admin-key header is required');
+
+    // timingSafeEqual prevents timing attacks — consistent with SignatureGuard
+    const expectedBuf = Buffer.from(expected);
+    const providedBuf = Buffer.from(adminKey);
+    if (expectedBuf.length !== providedBuf.length || !timingSafeEqual(expectedBuf, providedBuf)) {
       throw new UnauthorizedException('Invalid x-admin-key');
     }
   }

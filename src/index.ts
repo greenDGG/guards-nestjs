@@ -75,7 +75,7 @@ export { GeoIpGuard } from './guards/detection/geo-ip.guard';
 export type { GeoIpGuardOptions } from './guards/detection/geo-ip.guard';
 export { DeviceFingerprintGuard } from './guards/detection/device-fingerprint.guard';
 export type { DeviceFingerprintOptions } from './guards/detection/device-fingerprint.guard';
-export { AnomalyDetectionGuard } from './guards/detection/anomaly-detection.guard';
+export { AnomalyDetectionGuard, AnomalyDetectionInterceptor } from './guards/detection/anomaly-detection.guard';
 export type { AnomalyDetectionOptions } from './guards/detection/anomaly-detection.guard';
 
 // ─── Level 5: Business Guards ─────────────────────────────────────────────────

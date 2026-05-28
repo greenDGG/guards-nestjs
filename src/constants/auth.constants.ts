@@ -1,8 +1,27 @@
+// Fail fast if critical secrets are missing or still set to the insecure demo value.
+// In production, all secrets must come from the environment — no fallback.
+// In development, a fallback is allowed but a warning is printed.
+(function validateSecrets() {
+  const insecure = ['your-secret-key-change-in-production', 'your-refresh-secret-key'];
+  const isProd = process.env.NODE_ENV === 'production';
+
+  if (!process.env.JWT_SECRET || insecure.includes(process.env.JWT_SECRET)) {
+    const msg = 'JWT_SECRET is missing or set to the insecure demo value. Set it in .env.';
+    if (isProd) throw new Error(`[SECURITY] ${msg}`);
+    console.warn(`\x1b[33m⚠️  [SECURITY WARNING]\x1b[0m ${msg}`);
+  }
+  if (!process.env.JWT_REFRESH_SECRET || insecure.includes(process.env.JWT_REFRESH_SECRET)) {
+    const msg = 'JWT_REFRESH_SECRET is missing or set to the insecure demo value. Set it in .env.';
+    if (isProd) throw new Error(`[SECURITY] ${msg}`);
+    console.warn(`\x1b[33m⚠️  [SECURITY WARNING]\x1b[0m ${msg}`);
+  }
+})();
+
 export const AUTH_CONSTANTS = {
-  JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
-  JWT_EXPIRATION: parseInt(process.env.JWT_EXPIRATION || '3600'),
-  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key',
-  JWT_REFRESH_EXPIRATION: parseInt(process.env.JWT_REFRESH_EXPIRATION || '604800'),
+  JWT_SECRET:              process.env.JWT_SECRET              ?? 'dev-insecure-jwt-secret',
+  JWT_EXPIRATION:          parseInt(process.env.JWT_EXPIRATION ?? '3600'),
+  JWT_REFRESH_SECRET:      process.env.JWT_REFRESH_SECRET      ?? 'dev-insecure-refresh-secret',
+  JWT_REFRESH_EXPIRATION:  parseInt(process.env.JWT_REFRESH_EXPIRATION ?? '604800'),
   PERMISSIONS_CACHE_TTL: parseInt(process.env.PERMISSIONS_CACHE_TTL || '300000'),
 
   ROLES: {

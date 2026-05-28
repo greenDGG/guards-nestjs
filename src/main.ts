@@ -12,6 +12,26 @@ async function bootstrap() {
   // rawBody: true preserves req.rawBody (Buffer) — required by SignatureGuard
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
+  // Trust the first proxy hop so IpExtractorService reads the real client IP
+  // from X-Forwarded-For instead of the load balancer/reverse proxy address.
+  // Set to the number of trusted proxy hops in your infrastructure (1 for most setups).
+  // Without this, IP-based guards (IpGuard, rate limits) can be spoofed with a
+  // forged X-Forwarded-For header.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
+  // CORS — tighten allowedOrigins for your production domains
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+      : ['http://localhost:3000', 'http://localhost:4200'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key',
+                     'X-Idempotency-Key', 'X-Nonce', 'X-Timestamp',
+                     'X-Signature', 'X-CSRF-Token', 'X-Admin-Key',
+                     'Sec-CH-UA', 'Sec-CH-UA-Mobile', 'Sec-CH-UA-Platform'],
+    credentials: true,
+  });
+
   // Pipes
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 

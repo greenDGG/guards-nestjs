@@ -1,5 +1,7 @@
-import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common';
+import { CallHandler, CanActivate, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Observable, from, throwError } from 'rxjs';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 import { Request } from 'express';
 import { GUARD_METADATA } from '../../constants/guard.constants';
 import { AnomalyDetectionService } from '../../services/anomaly-detection.service';
@@ -11,6 +13,10 @@ export interface AnomalyDetectionOptions {
   trustScoreTtlMs?: number;
   logOnly?: boolean;
 }
+
+// WeakMap carries userId from guard to interceptor without polluting the request object
+type AnomalyRequestState = { userId: string | number; url: string };
+const anomalyRequestStates = new WeakMap<object, AnomalyRequestState>();
 
 /**
  * Level 4 — Anomaly Detection Guard
@@ -57,10 +63,11 @@ export class AnomalyDetectionGuard implements CanActivate {
     if (!user?.sub) return true;
 
     const userId = user.sub;
-    const isError = false; // Pre-handler: we don't know if it's an error yet
 
-    await this.anomalyService.recordRequest(userId, request.url, isError);
+    // Register state so the companion interceptor can record the real outcome
+    anomalyRequestStates.set(request as unknown as object, { userId, url: request.url });
 
+    // Check for anomalies based on the existing baseline (built by previous requests)
     const { isAnomalous, reason } = await this.anomalyService.detectAnomaly(
       userId,
       options.rpmMultiplier ?? 3.0,
@@ -77,5 +84,42 @@ export class AnomalyDetectionGuard implements CanActivate {
     }
 
     return true; // Always allows — penalizes trust score instead of blocking
+  }
+}
+
+/**
+ * AnomalyDetectionInterceptor — companion to AnomalyDetectionGuard.
+ *
+ * Records the ACTUAL outcome (success vs. error) of each request so that
+ * the anomaly service can track real error rates. The guard alone can only
+ * detect anomalies based on existing history; this interceptor builds that
+ * history with accurate data.
+ *
+ * Use alongside the guard:
+ *   @UseGuards(AnomalyDetectionGuard)
+ *   @UseInterceptors(AnomalyDetectionInterceptor)
+ *
+ * Or register both globally so every authenticated route is monitored.
+ */
+@Injectable()
+export class AnomalyDetectionInterceptor implements NestInterceptor {
+  constructor(private readonly anomalyService: AnomalyDetectionService) {}
+
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const request = context.switchToHttp().getRequest<object>();
+    const state   = anomalyRequestStates.get(request);
+
+    if (!state) return next.handle();
+
+    const { userId, url } = state;
+
+    return next.handle().pipe(
+      tap(() => this.anomalyService.recordRequest(userId, url, false).catch(() => {})),
+      catchError((err: unknown) =>
+        from(this.anomalyService.recordRequest(userId, url, true)).pipe(
+          switchMap(() => throwError(() => err)),
+        ),
+      ),
+    );
   }
 }

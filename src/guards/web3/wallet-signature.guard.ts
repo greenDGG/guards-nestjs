@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { randomBytes } from 'crypto';
 import { Request } from 'express';
 import { GUARD_METADATA } from '../../constants/guard.constants';
 import { RedisStoreService } from '../../services/redis-store.service';
@@ -136,7 +137,7 @@ export async function issueWalletNonce(
   store: RedisStoreService,
   ttlMs: number = 300_000,
 ): Promise<string> {
-  const nonce = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+  const nonce = randomBytes(16).toString('hex');
   const message = `Sign this message to authenticate your wallet.\n\nNonce: ${nonce}\nTimestamp: ${new Date().toISOString()}`;
   await store.set(`walletNonce:${address.toLowerCase()}`, nonce, ttlMs);
   return message;
