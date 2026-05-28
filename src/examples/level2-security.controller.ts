@@ -1,4 +1,6 @@
 import { Controller, ForbiddenException, Get, Post, Body, Res, UseGuards, UseInterceptors, SetMetadata } from '@nestjs/common';
+import { HeaderValidationGuard } from '../guards/security/header-validation.guard';
+import { HeaderValidate } from '../decorators/header-validation.decorator';
 import { Response } from 'express';
 import { Public } from '../decorators/public.decorator';
 import { IpFilter } from '../decorators/ip.decorator';
@@ -354,6 +356,101 @@ export class Level2SecurityController {
   auditFail(@Body() body: any) {
     // Simula acceso denegado — el interceptor lo captura y registra outcome=error
     throw new ForbiddenException('Acceso denegado — sin permisos');
+  }
+
+  // ══ HeaderValidationGuard — deterministic header checks ═══════════════════
+  //
+  // Prueba con: npm run test:header-validation
+
+  // ── Automation blocklist — activado por defecto ───────────────────────────
+  // Envía cualquier header que empiece con x-playwright, x-selenium, etc.
+  // para ver el rechazo. Headers normales → pasan sin problemas.
+  @Get('header-check')
+  @HeaderValidate()
+  @UseGuards(HeaderValidationGuard)
+  headerCheck() {
+    return {
+      guard:   'HeaderValidationGuard',
+      mode:    'automation-blocklist (default)',
+      message: 'Ningún header de automatización detectado',
+      tip:     'Agrega header "x-playwright: 1" para ser bloqueado',
+    };
+  }
+
+  // ── Browser headers + Accept wildcard ────────────────────────────────────
+  // Requiere Accept, Accept-Language, Accept-Encoding.
+  // Bloquea si el UA es de navegador pero el Accept es solo "*/*".
+  // Prueba con curl sin headers para ver la cascada de violations.
+  @Get('header-browser')
+  @HeaderValidate({
+    requireBrowserHeaders:  true,
+    checkAcceptWildcard:    true,
+  })
+  @UseGuards(HeaderValidationGuard)
+  headerBrowser() {
+    return {
+      guard:   'HeaderValidationGuard',
+      mode:    'browser-headers + accept-wildcard',
+      message: 'Headers de navegador válidos — Accept no es */*',
+      tip:     'Llama con User-Agent de Chrome y Accept: */* para activar el check',
+    };
+  }
+
+  // ── sec-ch-ua consistency ─────────────────────────────────────────────────
+  // Chrome 90+ DEBE enviar Sec-CH-UA. Si el UA dice "Chrome/124" pero
+  // falta el header, o la versión no coincide → 403.
+  // Prueba enviando UA de Chrome/124 sin el header Sec-CH-UA.
+  @Get('header-sec-ch-ua')
+  @HeaderValidate({ checkSecChUa: true, logOnly: false })
+  @UseGuards(HeaderValidationGuard)
+  headerSecChUa() {
+    return {
+      guard:   'HeaderValidationGuard',
+      mode:    'sec-ch-ua consistency',
+      message: 'sec-ch-ua presente y consistente con el User-Agent',
+      tip:     'Envía User-Agent: Mozilla/5.0 Chrome/124 sin Sec-CH-UA para ver el rechazo',
+    };
+  }
+
+  // ── Custom rules — API versioning ─────────────────────────────────────────
+  // Demuestra reglas custom: x-api-version requerido con formato vN,
+  // y Accept no puede ser */*.
+  @Get('header-custom')
+  @HeaderValidate({
+    rules: [
+      { header: 'x-api-version', required: true, pattern: /^v\d+$/ },
+      { header: 'accept',        required: true, notPattern: /^\*\/\*$/ },
+    ],
+  })
+  @UseGuards(HeaderValidationGuard)
+  headerCustom() {
+    return {
+      guard:   'HeaderValidationGuard',
+      mode:    'custom rules',
+      message: 'x-api-version válido y Accept no es */*',
+      tip:     'Envía sin x-api-version, o con x-api-version: 2 (sin la v), para ver el rechazo',
+    };
+  }
+
+  // ── Observación — logOnly: true ────────────────────────────────────────────
+  // Todos los checks activos pero sin bloquear. Útil para medir el impacto
+  // antes de activar enforcement en producción.
+  @Get('header-observe')
+  @HeaderValidate({
+    requireBrowserHeaders: true,
+    checkSecChUa:          true,
+    checkAcceptWildcard:   true,
+    minHeaderCount:        4,
+    logOnly:               true,
+  })
+  @UseGuards(HeaderValidationGuard)
+  headerObserve() {
+    return {
+      guard:   'HeaderValidationGuard',
+      mode:    'logOnly: true — nunca bloquea',
+      message: 'Siempre pasa. Mira los logs del servidor para ver X-Header-Violations.',
+      tip:     'Envía con curl (sin headers de navegador) para ver las violations en logs',
+    };
   }
 
   // ── Concurrency global — endpoint de recurso único ────────────────────────

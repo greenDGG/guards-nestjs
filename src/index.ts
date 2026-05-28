@@ -38,6 +38,7 @@ export type { ContentTypeOptions } from './guards/security/content-type.guard';
 export { CorsGuard } from './guards/security/cors.guard';
 export type { CorsGuardOptions } from './guards/security/cors.guard';
 export { TimingAttackGuard, TimingAttackInterceptor } from './guards/security/timing-attack.guard';
+export { HeaderValidationGuard } from './guards/security/header-validation.guard';
 export type { TimingAttackOptions } from './guards/security/timing-attack.guard';
 export { CsrfGuard, generateCsrfToken } from './guards/security/csrf.guard';
 export type { CsrfOptions } from './guards/security/csrf.guard';
@@ -112,6 +113,8 @@ export type { NonceOptions } from './decorators/nonce.decorator';
 export { Concurrent } from './decorators/concurrent.decorator';
 export type { ConcurrencyOptions } from './decorators/concurrent.decorator';
 export { RateLimit } from './decorators/rate-limit-by-route.decorator';
+export { HeaderValidate } from './decorators/header-validation.decorator';
+export type { HeaderValidationOptions, HeaderRule } from './decorators/header-validation.decorator';
 export type { RateLimitByRouteOptions, RateLimitProfile } from './decorators/rate-limit-by-route.decorator';
 export { IpFilter } from './decorators/ip.decorator';
 export type { IpGuardOptions } from './decorators/ip.decorator';
@@ -158,6 +161,8 @@ export {
   NonceInvalidException,
   ConcurrencyLimitException,
   CsrfTokenException,
+  InvalidHeaderException,
+  MissingRequiredHeaderException,
 } from './exceptions/security.exception';
 export {
   BotDetectedException,

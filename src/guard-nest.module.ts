@@ -27,6 +27,7 @@ import { IdempotencyInterceptor } from './guards/basic/idempotency.interceptor';
 import { ConcurrencyInterceptor } from './guards/basic/concurrency.interceptor';
 import { CircuitBreakerGuard, CircuitBreakerInterceptor } from './guards/rate-limit/circuit-breaker.guard';
 import { TimingAttackGuard, TimingAttackInterceptor } from './guards/security/timing-attack.guard';
+import { HeaderValidationGuard } from './guards/security/header-validation.guard';
 import { CsrfGuard } from './guards/security/csrf.guard';
 import { ReplayProtectionGuard } from './guards/basic/replay-protection.guard';
 import { AuditLogInterceptor } from './guards/basic/audit-log.interceptor';
@@ -68,6 +69,7 @@ const ALL_SERVICES = [
   CircuitBreakerInterceptor,
   TimingAttackGuard,
   TimingAttackInterceptor,
+  HeaderValidationGuard,
   CsrfGuard,
   ReplayProtectionGuard,
   AuditLogInterceptor,

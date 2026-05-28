@@ -1,4 +1,4 @@
-import { ForbiddenException, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
+import { ForbiddenException, UnauthorizedException, HttpException, HttpStatus, BadRequestException } from '@nestjs/common';
 
 export class IpBlockedException extends ForbiddenException {
   constructor(ip: string) {
@@ -129,6 +129,20 @@ export class IdempotencyConflictException extends HttpException {
       HttpStatus.CONFLICT,
     );
     this.name = 'IdempotencyConflictException';
+  }
+}
+
+export class InvalidHeaderException extends ForbiddenException {
+  constructor(header: string, reason: string) {
+    super(`Invalid header '${header}': ${reason}`);
+    this.name = 'InvalidHeaderException';
+  }
+}
+
+export class MissingRequiredHeaderException extends BadRequestException {
+  constructor(header: string) {
+    super(`Missing required header: '${header}'`);
+    this.name = 'MissingRequiredHeaderException';
   }
 }
 
