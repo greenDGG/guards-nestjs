@@ -1,11 +1,11 @@
-import { Controller, Get, UseGuards, SetMetadata } from '@nestjs/common';
+import { Controller, Get, UseGuards, UseInterceptors, SetMetadata } from '@nestjs/common';
 import { Public } from '../decorators/public.decorator';
 import { SecurityCtx } from '../decorators/security-context.decorator';
 import { SecurityContext } from '../interfaces/security-context.interface';
 import { SlidingWindowRateLimitGuard } from '../guards/rate-limit/sliding-window-rate-limit.guard';
 import { AdaptiveRateLimitGuard } from '../guards/rate-limit/adaptive-rate-limit.guard';
 import { BotDetectionGuard } from '../guards/detection/bot-detection.guard';
-import { CircuitBreakerGuard } from '../guards/rate-limit/circuit-breaker.guard';
+import { CircuitBreakerGuard, CircuitBreakerInterceptor } from '../guards/rate-limit/circuit-breaker.guard';
 import { GUARD_METADATA } from '../constants/guard.constants';
 
 /**
@@ -82,8 +82,7 @@ export class Level3RateLimitController {
     };
   }
 
-  // ── Circuit Breaker ────────────────────────────────────────────────────────
-  // Se abre si detecta 3+ fallos en 30s. Reset después de 15s.
+  // ── Circuit Breaker — fallo aleatorio (30%) para demo interactiva ────────
   @Get('circuit-breaker')
   @SetMetadata(GUARD_METADATA.CIRCUIT_BREAKER_OPTIONS, {
     serviceKey: 'demo-service',
@@ -92,8 +91,8 @@ export class Level3RateLimitController {
     rollingWindowMs: 30_000,
   })
   @UseGuards(CircuitBreakerGuard)
+  @UseInterceptors(CircuitBreakerInterceptor)
   circuitBreaker() {
-    // Simular fallo aleatorio (30% de probabilidad) para demostrar el circuit
     if (Math.random() < 0.3) {
       throw new Error('Servicio downstream falló');
     }
@@ -102,5 +101,35 @@ export class Level3RateLimitController {
       message: 'Servicio respondió correctamente',
       tip: 'El circuit se abre si falla 3 veces en 30s',
     };
+  }
+
+  // ── Circuit Breaker — siempre falla (para test determinista) ─────────────
+  @Get('circuit-faulty')
+  @SetMetadata(GUARD_METADATA.CIRCUIT_BREAKER_OPTIONS, {
+    serviceKey: 'test-service',
+    failureThreshold: 3,
+    successThreshold: 2,
+    timeout: 6_000,
+    rollingWindowMs: 30_000,
+  })
+  @UseGuards(CircuitBreakerGuard)
+  @UseInterceptors(CircuitBreakerInterceptor)
+  circuitFaulty() {
+    throw new Error('Downstream siempre falla');
+  }
+
+  // ── Circuit Breaker — siempre tiene éxito (para recuperar el circuit) ────
+  @Get('circuit-healthy')
+  @SetMetadata(GUARD_METADATA.CIRCUIT_BREAKER_OPTIONS, {
+    serviceKey: 'test-service',
+    failureThreshold: 3,
+    successThreshold: 2,
+    timeout: 6_000,
+    rollingWindowMs: 30_000,
+  })
+  @UseGuards(CircuitBreakerGuard)
+  @UseInterceptors(CircuitBreakerInterceptor)
+  circuitHealthy() {
+    return { message: 'Downstream respondió correctamente', state: 'recovered' };
   }
 }

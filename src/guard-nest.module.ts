@@ -24,6 +24,7 @@ import { PermissionsGuard } from './guards/basic/permissions.guard';
 import { AdaptiveRateLimitGuard } from './guards/rate-limit/adaptive-rate-limit.guard';
 import { IdempotencyInterceptor } from './guards/basic/idempotency.interceptor';
 import { ConcurrencyInterceptor } from './guards/basic/concurrency.interceptor';
+import { CircuitBreakerGuard, CircuitBreakerInterceptor } from './guards/rate-limit/circuit-breaker.guard';
 import { AUTH_CONSTANTS } from './constants/auth.constants';
 
 export interface GuardNestModuleOptions {
@@ -55,6 +56,8 @@ const ALL_SERVICES = [
   EtherscanService,
   SecurityContextService,
   AdaptiveRateLimitGuard,
+  CircuitBreakerGuard,
+  CircuitBreakerInterceptor,
   IdempotencyInterceptor,
   ConcurrencyInterceptor,
 ];

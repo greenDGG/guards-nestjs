@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, ServiceUnavailableException } from '@nestjs/common';
 
 export class BotDetectedException extends ForbiddenException {
   constructor(score: number) {
@@ -21,11 +21,13 @@ export class FingerprintChangedException extends ForbiddenException {
   }
 }
 
-export class CircuitOpenException extends ForbiddenException {
+export class CircuitOpenException extends ServiceUnavailableException {
+  public readonly retryAfter: number;
   constructor(serviceKey: string, retryAfterMs: number) {
     super(
       `Service '${serviceKey}' is temporarily unavailable. Circuit breaker is open. Retry after ${Math.ceil(retryAfterMs / 1000)}s`,
     );
+    this.retryAfter = Math.ceil(retryAfterMs / 1000);
     this.name = 'CircuitOpenException';
   }
 }

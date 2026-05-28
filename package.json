@@ -38,7 +38,8 @@
     "test:time-based": "ts-node scripts/test-time-based.ts",
     "test:fingerprint": "ts-node scripts/test-fingerprint.ts",
     "test:geo": "ts-node scripts/test-geo.ts",
-    "test:adaptive": "ts-node scripts/test-adaptive.ts"
+    "test:adaptive": "ts-node scripts/test-adaptive.ts",
+    "test:circuit": "ts-node scripts/test-circuit.ts"
   },
   "keywords": ["nestjs", "guards", "jwt", "roles", "permissions", "authentication", "authorization"],
   "dependencies": {

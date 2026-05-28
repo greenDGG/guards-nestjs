@@ -1,5 +1,7 @@
-import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common';
+import { CallHandler, CanActivate, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Observable, from, throwError } from 'rxjs';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 import { RedisStoreService } from '../../services/redis-store.service';
 import { GUARD_METADATA } from '../../constants/guard.constants';
 import { CircuitOpenException } from '../../exceptions/detection.exception';
@@ -141,5 +143,37 @@ export class CircuitBreakerGuard implements CanActivate {
 
   private async saveCircuit(key: string, data: CircuitData, ttlMs: number): Promise<void> {
     await this.store.set(key, JSON.stringify(data), ttlMs * 2);
+  }
+}
+
+/**
+ * CircuitBreakerInterceptor — companion to CircuitBreakerGuard.
+ *
+ * Records the outcome of every handler call so the guard can track
+ * the failure/success counters and transition states correctly.
+ *
+ * Must run on the same route as CircuitBreakerGuard:
+ *   @UseGuards(CircuitBreakerGuard)
+ *   @UseInterceptors(CircuitBreakerInterceptor)
+ */
+@Injectable()
+export class CircuitBreakerInterceptor implements NestInterceptor {
+  constructor(private readonly guard: CircuitBreakerGuard) {}
+
+  intercept(_context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const request = _context.switchToHttp().getRequest();
+    const storeKey: string | undefined = request._circuitKey;
+    const cfg: any | undefined = request._circuitOptions;
+
+    if (!storeKey || !cfg) return next.handle();
+
+    return next.handle().pipe(
+      tap(() => from(this.guard.recordSuccess(storeKey, cfg))),
+      catchError((err: unknown) =>
+        from(this.guard.recordFailure(storeKey, cfg)).pipe(
+          switchMap(() => throwError(() => err)),
+        ),
+      ),
+    );
   }
 }

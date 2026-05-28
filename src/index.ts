@@ -44,7 +44,7 @@ export type { SlidingWindowOptions } from './guards/rate-limit/sliding-window-ra
 export { AdaptiveRateLimitGuard } from './guards/rate-limit/adaptive-rate-limit.guard';
 export type { AdaptiveRateLimitOptions, SignalTier } from './guards/rate-limit/adaptive-rate-limit.guard';
 export { DEFAULT_TRUST_TIERS, DEFAULT_BOT_TIERS } from './guards/rate-limit/adaptive-rate-limit.guard';
-export { CircuitBreakerGuard } from './guards/rate-limit/circuit-breaker.guard';
+export { CircuitBreakerGuard, CircuitBreakerInterceptor } from './guards/rate-limit/circuit-breaker.guard';
 export type { CircuitBreakerOptions } from './guards/rate-limit/circuit-breaker.guard';
 
 // ─── Level 4: Detection Guards ────────────────────────────────────────────────
