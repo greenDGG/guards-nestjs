@@ -3,14 +3,23 @@
  *
  * Run: npx ts-node scripts/test-bot.ts
  *
- * What this tests:
- *   1. Real browser headers → score low → passes
- *   2. curl-like User-Agent → score high → blocked (threshold=70)
- *   3. HeadlessChrome UA → blocked
- *   4. Missing all headers → blocked
- *   5. Honeypot field in POST body → blocked
- *   6. Rapid requests (machine timing) → adaptive trust-score drops
- *   7. log-only mode → never blocked regardless of UA
+ * Scoring model (default weights):
+ *   +30  No User-Agent
+ *   +25  Headless/automation UA (HeadlessChrome, Puppeteer, curl, wget, etc.)
+ *   +15  Malformed UA (<20 chars or no parentheses)
+ *   + 5  Missing Accept header
+ *   + 5  Missing Accept-Encoding
+ *   + 5  Missing Accept-Language
+ *   + 5  Chrome UA without sec-fetch-site
+ *   + 5  All three Accept headers missing (bonus)
+ *   +25  Very fast requests (avg interval < 200ms)
+ *   +15  Fast requests (avg interval < 500ms)
+ *   +20  Machine-precision regularity (CV < 0.05)
+ *   +30  Honeypot field filled in POST body
+ *
+ * Note: node-fetch (used here) auto-adds Accept and Accept-Encoding.
+ *   UA-based tests use /bot-strict (threshold=30) where headless UA (+25)
+ *   + missing Accept-Language (+5) = 30 reliably triggers the block.
  */
 
 const BASE = 'http://localhost:3000';
@@ -59,7 +68,7 @@ async function runCase(tc: TestCase): Promise<void> {
   }
 }
 
-// ── Browser headers (real Chrome) ────────────────────────────────────────
+// ── Header sets ────────────────────────────────────────────────────────────
 
 const REAL_BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -78,48 +87,19 @@ async function main() {
   console.log('  guard-nest — Bot Detection Test Suite');
   console.log('════════════════════════════════════════════\n');
 
-  // ── Group 1: Normal threshold (70) ─────────────────────────────────────
-  console.log('── /demo/level4/bot-check  (threshold = 70) ──\n');
+  // ── Group 1: Normal threshold (70) — legit traffic always passes ──────────
+  console.log('── /demo/level4/bot-check  (threshold = 70) ──');
+  console.log('   At threshold 70, multiple weak signals must combine to block.\n');
 
   await runCase({
-    label: 'Real Chrome UA + full headers (score ~0) → should PASS',
+    label: 'Real Chrome UA + full headers (score ~0) → PASS',
     path: '/demo/level4/bot-check',
     headers: REAL_BROWSER_HEADERS,
     expectBlocked: false,
   });
 
   await runCase({
-    label: 'curl/8.0 User-Agent (+25) + missing headers (+15) → should BLOCK',
-    path: '/demo/level4/bot-check',
-    headers: { 'User-Agent': 'curl/8.0' },
-    expectBlocked: true,
-  });
-
-  await runCase({
-    label: 'HeadlessChrome UA (+25) + missing headers (+15) → should BLOCK',
-    path: '/demo/level4/bot-check',
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 HeadlessChrome/120.0.0.0 Safari/537.36',
-    },
-    expectBlocked: true,
-  });
-
-  await runCase({
-    label: 'Puppeteer UA (+25) → should BLOCK',
-    path: '/demo/level4/bot-check',
-    headers: { 'User-Agent': 'puppeteer-bot/1.0' },
-    expectBlocked: true,
-  });
-
-  await runCase({
-    label: 'No User-Agent at all (+30) → should BLOCK',
-    path: '/demo/level4/bot-check',
-    headers: { 'User-Agent': '' },
-    expectBlocked: true,
-  });
-
-  await runCase({
-    label: 'Googlebot (known good bot) → should PASS (whitelisted)',
+    label: 'Googlebot (whitelisted — score always 0) → PASS',
     path: '/demo/level4/bot-check',
     headers: {
       'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
@@ -127,8 +107,10 @@ async function main() {
     expectBlocked: false,
   });
 
-  // ── Group 2: Strict threshold (30) ─────────────────────────────────────
-  console.log('\n── /demo/level4/bot-strict  (threshold = 30) ──\n');
+  // ── Group 2: Strict threshold (30) — bot UA detection ────────────────────
+  // headless UA (+25) + missing Accept-Language (+5) = 30 → blocked at threshold 30.
+  // node-fetch auto-adds Accept and Accept-Encoding, so those signals are suppressed.
+  console.log('\n── /demo/level4/bot-strict  (threshold = 30) — UA detection ──\n');
 
   await runCase({
     label: 'Real Chrome + full headers → PASS even in strict mode',
@@ -138,16 +120,55 @@ async function main() {
   });
 
   await runCase({
-    label: 'Missing Accept-Language (+5) + missing sec-fetch (+5) + short UA (+15) → BLOCK at 30',
+    label: 'curl/8.0 UA (+25) + no Accept-Language (+5) = 30 → BLOCK',
+    path: '/demo/level4/bot-strict',
+    headers: { 'User-Agent': 'curl/8.0' },
+    expectBlocked: true,
+  });
+
+  await runCase({
+    label: 'HeadlessChrome UA (+25) + no Accept-Language (+5) = 30 → BLOCK',
     path: '/demo/level4/bot-strict',
     headers: {
-      'User-Agent': 'Go-http-client/1.1',  // malformed (<20 chars + no parens: +15)
+      'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 HeadlessChrome/120.0.0.0 Safari/537.36',
     },
     expectBlocked: true,
   });
 
-  // ── Group 3: Honeypot POST ──────────────────────────────────────────────
-  console.log('\n── /demo/level4/bot-form  (honeypot, threshold = 25) ──\n');
+  await runCase({
+    label: 'Puppeteer UA (+25) + no Accept-Language (+5) = 30 → BLOCK',
+    path: '/demo/level4/bot-strict',
+    headers: { 'User-Agent': 'puppeteer-bot/1.0' },
+    expectBlocked: true,
+  });
+
+  await runCase({
+    label: 'No User-Agent (+30) + no Accept-Language (+5) = 35 → BLOCK',
+    path: '/demo/level4/bot-strict',
+    headers: { 'User-Agent': '' },
+    expectBlocked: true,
+  });
+
+  await runCase({
+    label: 'Googlebot → PASS (whitelisted, returns score 0)',
+    path: '/demo/level4/bot-strict',
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+    },
+    expectBlocked: false,
+  });
+
+  await runCase({
+    label: 'Go-http-client/1.1 — matches headless pattern (+25) + no AcceptLang (+5) = 30 → BLOCK',
+    path: '/demo/level4/bot-strict',
+    headers: { 'User-Agent': 'Go-http-client/1.1' },
+    expectBlocked: true,
+  });
+
+  // ── Group 3: Honeypot POST (threshold = 30) ─────────────────────────────
+  // honeypot field filled = +30 → blocked even without timing signal.
+  // threshold is 30 (not 25) so normal POST is safe even when timing adds +25.
+  console.log('\n── /demo/level4/bot-form  (honeypot, threshold = 30) ──\n');
 
   await runCase({
     label: 'Normal POST, no honeypot fields → PASS',
@@ -180,14 +201,14 @@ async function main() {
   console.log('\n── /demo/level4/bot-log-only  (logOnly = true) ──\n');
 
   await runCase({
-    label: 'curl UA — should PASS (log-only never blocks)',
+    label: 'curl UA — PASS (log-only never blocks)',
     path: '/demo/level4/bot-log-only',
     headers: { 'User-Agent': 'curl/8.0' },
     expectBlocked: false,
   });
 
   await runCase({
-    label: 'No headers at all — should PASS (log-only never blocks)',
+    label: 'No headers at all — PASS (log-only never blocks)',
     path: '/demo/level4/bot-log-only',
     headers: { 'User-Agent': '' },
     expectBlocked: false,
@@ -195,7 +216,7 @@ async function main() {
 
   // ── Group 5: Machine-timing simulation ─────────────────────────────────
   console.log('\n── Rapid requests (machine timing detection) ──\n');
-  console.log('   Firing 10 requests with <50ms gap...\n');
+  console.log('   Firing 10 requests with machine-speed intervals...\n');
 
   const timingResults: number[] = [];
   for (let i = 0; i < 10; i++) {
@@ -211,11 +232,12 @@ async function main() {
   }
   const avg = timingResults.reduce((a, b) => a + b, 0) / timingResults.length;
   console.log(`   Average response time: ${avg.toFixed(0)}ms`);
-  console.log('   Note: timing-based detection requires many requests in a short window');
-  console.log('         Check server logs for the bot score on each request');
+  console.log('   Note: real browser headers score 0 for UA/header signals.');
+  console.log('         Timing adds +25 (avg<200ms) — still below threshold 70.');
+  console.log('         Check server logs to see the bot score per request.\n');
 
-  console.log('\n════════════════════════════════════════════');
-  console.log('  Done — Check server console for scores');
+  console.log('════════════════════════════════════════════');
+  console.log('  Done — Check server console for detailed scores');
   console.log('════════════════════════════════════════════\n');
 }
 

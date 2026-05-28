@@ -59,7 +59,7 @@ export class Level4DetectionController {
   // POST con campo "website" relleno activa el honeypot (+30 puntos)
   @Post('bot-form')
   @SetMetadata(GUARD_METADATA.BOT_OPTIONS, {
-    threshold: 25,
+    threshold: 30,
     honeypotFields: ['website', '_gotcha'],
     logOnly: false,
   })
