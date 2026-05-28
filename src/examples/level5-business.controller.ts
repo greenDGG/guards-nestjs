@@ -110,6 +110,39 @@ export class Level5BusinessController {
     return { guard: 'TimeBasedAccessGuard', message: 'Pasaste la ventana de 1 minuto' };
   }
 
+  // ── Time Access — maintenance window (siempre bloqueado) ──────────────────
+  // Demuestra que maintenanceWindows tiene prioridad sobre allowedWindows.
+  // La maintenance cubre las 24h → acceso bloqueado siempre.
+  @Get('under-maintenance')
+  @SetMetadata(GUARD_METADATA.TIME_ACCESS_OPTIONS, {
+    allowedWindows: [{ start: '00:00', end: '23:59' }],
+    maintenanceWindows: [{ start: '00:00', end: '23:59' }],
+    timezone: 'UTC',
+  })
+  @UseGuards(TimeBasedAccessGuard)
+  @Public()
+  underMaintenance() {
+    return { guard: 'TimeBasedAccessGuard', message: 'Este mensaje nunca debería verse' };
+  }
+
+  // ── Time Access — ventana nocturna (overnight 22:00–06:00) ───────────────
+  // Demuestra soporte para ventanas que cruzan medianoche.
+  // Accesible entre las 22:00 y 06:00 UTC.
+  @Get('overnight-access')
+  @SetMetadata(GUARD_METADATA.TIME_ACCESS_OPTIONS, {
+    allowedWindows: [{ start: '22:00', end: '06:00' }],
+    timezone: 'UTC',
+  })
+  @UseGuards(TimeBasedAccessGuard)
+  @Public()
+  overnightAccess() {
+    return {
+      guard: 'TimeBasedAccessGuard',
+      message: 'Acceso nocturno (22:00–06:00 UTC) — estás en la ventana',
+      currentTime: new Date().toISOString(),
+    };
+  }
+
   // ── Tenant — aislamiento multi-tenant (strict: false) ───────────────────
   // El tenantId del JWT debe coincidir con el :tenantId de la URL.
   // strict: false → si no hay tenantId en el JWT, el guard pasa igual.
