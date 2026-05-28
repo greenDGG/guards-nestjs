@@ -76,60 +76,36 @@ curl -X POST http://localhost:3000/auth/login \
 
 ---
 
-## Pipeline
+## Cómo funciona un guard
 
-Orden típico de guards en una request real. Cada capa puede cortocircuitar antes de llegar a la siguiente.
+Cada guard es un archivo independiente. Lo pegas en tu proyecto, lo registras y listo.
 
 ```
-                         HTTP Request
-                              │
-         ┌────────────────────▼────────────────────┐
-         │         NETWORK SECURITY  (Lv 2)         │
-         │  IpGuard · HttpsOnly · RequestSize       ├──► 403 / 413
-         │  ContentType · CORS · TimingAttack†      │
-         └────────────────────┬────────────────────┘
-                              │
-         ┌────────────────────▼────────────────────┐
-         │           RATE LIMITING  (Lv 3)          │
-         │  SlidingWindowRateLimit · Adaptive       ├──► 429
-         │  CircuitBreaker                          ├──► 503
-         └────────────────────┬────────────────────┘
-                              │
-         ┌────────────────────▼────────────────────┐
-         │             DETECTION  (Lv 4)            │
-         │  BotDetection · GeoIP · Fingerprint      ├──► 403
-         │  AnomalyDetection  →  adjusts trust      │
-         └────────────────────┬────────────────────┘
-                              │
-         ┌────────────────────▼────────────────────┐
-         │           AUTHENTICATION  (Lv 1)         │
-         │  JWT · ApiKey · BasicAuth                ├──► 401
-         │  WalletSignature                         │
-         └────────────────────┬────────────────────┘
-                              │
-         ┌────────────────────▼────────────────────┐
-         │           AUTHORIZATION  (Lv 1)          │
-         │  Roles · Permissions · Ownership         ├──► 403
-         │  Tenant                                  │
-         └────────────────────┬────────────────────┘
-                              │
-         ┌────────────────────▼────────────────────┐
-         │          BUSINESS RULES  (Lv 5-6)        │
-         │  Subscription · MFA · TimeAccess         ├──► 403
-         │  ChainId · TokenHolder · SuspiciousTx    │
-         └────────────────────┬────────────────────┘
-                              │
-         ┌────────────────────▼────────────────────┐
-         │         HANDLER  +  INTERCEPTORS         │
-         │  Nonce · Signature · Concurrency         │
-         │  Idempotency                             │
-         │  CircuitBreakerInterceptor†              │
-         │  TimingAttackInterceptor†                │
-         └────────────────────┬────────────────────┘
-                              │
-                         HTTP Response
+  Request
+     │
+     ▼
+ ┌────────────┐   falla   ┌──────────────────────┐
+ │  Tu guard  │ ─────────►│  401 / 403 / 429 ...  │
+ └─────┬──────┘           └──────────────────────┘
+       │ pasa
+       ▼
+  Handler
+       │
+       ▼
+  Response
+```
 
-† companion interceptor — registra el resultado después del handler
+Los guards se apilan — usas solo los que necesitas:
+
+```typescript
+// webhook externo
+@UseGuards(ContentTypeGuard, IpGuard)
+
+// endpoint autenticado con rate limit
+@UseGuards(JwtAuthGuard, RolesGuard, SlidingWindowRateLimitGuard)
+
+// acción sensible Web3
+@UseGuards(WalletSignatureGuard, ChainIdGuard, TokenHolderGuard)
 ```
 
 ---
@@ -194,7 +170,7 @@ Cada guard tiene su propia doc en `docs/`:
 |-----------|------|
 | Basic | [JWT](docs/guards/basic/jwt-auth.md) · [Roles](docs/guards/basic/roles.md) · [Permissions](docs/guards/basic/permissions.md) · [ApiKey](docs/guards/basic/api-key.md) · [BasicAuth](docs/guards/basic/basic-auth.md) |
 | Basic+ | [Ownership](docs/guards/basic/ownership.md) · [Signature](docs/guards/basic/signature.md) · [Idempotency](docs/guards/basic/idempotency.md) · [Nonce](docs/guards/basic/nonce.md) · [Concurrency](docs/guards/basic/concurrency.md) |
-| Security | [IP/CIDR](docs/guards/security/ip.md) · [HTTPS](docs/guards/security/https-only.md) · [RequestSize](docs/guards/security/request-size.md) · [ContentType](docs/guards/security/content-type.md) · [CORS](docs/guards/security/cors.md) |
+| Security | [IP/CIDR](docs/guards/security/ip.md) · [HTTPS](docs/guards/security/https-only.md) · [RequestSize](docs/guards/security/request-size.md) · [ContentType](docs/guards/security/content-type.md) · [CORS](docs/guards/security/cors.md) · [TimingAttack](docs/guards/security/timing-attack.md) |
 | Rate Limit | [SlidingWindow](docs/guards/rate-limit/sliding-window.md) · [Adaptive](docs/guards/rate-limit/adaptive.md) · [CircuitBreaker](docs/guards/rate-limit/circuit-breaker.md) |
 | Detection | [BotDetection](docs/guards/detection/bot-detection.md) · [GeoIP](docs/guards/detection/geo-ip.md) · [DeviceFingerprint](docs/guards/detection/device-fingerprint.md) · [Anomaly](docs/guards/detection/anomaly-detection.md) |
 | Business | [Subscription](docs/guards/business/subscription.md) · [TimeAccess](docs/guards/business/time-access.md) · [Tenant](docs/guards/business/tenant.md) · [MFA](docs/guards/business/mfa.md) |
