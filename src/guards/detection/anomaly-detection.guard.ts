@@ -32,6 +32,11 @@ const anomalyRequestStates = new WeakMap<object, AnomalyRequestState>();
  * When anomaly is detected, the user's trust score in RedisStoreService is reduced.
  * This guard never blocks directly — it only adjusts trust scores.
  *
+ * IMPORTANT: This guard REQUIRES AnomalyDetectionInterceptor to function correctly.
+ *   Without the interceptor, recordRequest() is never called and the error-rate
+ *   baseline stays empty forever — anomaly detection silently stops working.
+ *   Always apply both:
+ *
  * Usage:
  *   Apply globally via APP_GUARD to monitor all users automatically.
  *   Pair with AdaptiveRateLimitGuard for automatic throttling of suspicious users.
@@ -41,6 +46,7 @@ const anomalyRequestStates = new WeakMap<object, AnomalyRequestState>();
  *     trustScorePenalty: 15,
  *   })
  *   @UseGuards(AnomalyDetectionGuard)
+ *   @UseInterceptors(AnomalyDetectionInterceptor)  // ← required companion
  */
 @Injectable()
 export class AnomalyDetectionGuard implements CanActivate {

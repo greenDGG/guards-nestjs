@@ -62,16 +62,10 @@ const HEADLESS_PATTERNS = [
   /okhttp/i,
 ];
 
-// Generic HTTP client UAs — these are legitimate in server-to-server traffic
-// (microservices, CI pipelines, monitoring). NOT in HEADLESS_PATTERNS by default
-// to avoid false positives. Add to options.allowedBots if you want to whitelist
-// them explicitly, or exclude specific routes from bot detection.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SERVER_CLIENT_PATTERNS = [
-  /axios\//i,       // axios HTTP client
-  /node-fetch\//i,  // node-fetch
-  /node\.js\//i,    // generic Node.js HTTP
-];
+// Generic HTTP client UAs (axios, node-fetch, node.js) are intentionally excluded
+// from HEADLESS_PATTERNS — they appear in legitimate server-to-server traffic
+// (microservices, CI pipelines, monitoring) and would cause false positives.
+// To allow specific bot UAs, pass them in options.allowedBots.
 
 // Known good bots to whitelist by default
 const ALLOWED_GOOD_BOTS = [

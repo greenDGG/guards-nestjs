@@ -35,6 +35,8 @@ interface TestCase {
   expectBlocked?: boolean;
 }
 
+let failures = 0;
+
 async function runCase(tc: TestCase): Promise<void> {
   const method = tc.method ?? 'GET';
   const url = `${BASE}${tc.path}`;
@@ -53,6 +55,7 @@ async function runCase(tc: TestCase): Promise<void> {
 
     const blocked = res.status === 403 || res.status === 429;
     const correct = tc.expectBlocked ? blocked : !blocked;
+    if (!correct) failures++;
     const icon = correct ? '✅' : '⚠️ ';
     const expected = tc.expectBlocked ? 'BLOCKED' : 'ALLOWED';
     const actual = blocked ? 'BLOCKED' : `ALLOWED [${res.status}]`;
@@ -241,4 +244,6 @@ async function main() {
   console.log('════════════════════════════════════════════\n');
 }
 
-main().catch(console.error);
+main()
+  .then(() => { if (failures > 0) { console.error(`\n❌ ${failures} test(s) failed`); process.exit(1); } })
+  .catch((e: unknown) => { console.error(e); process.exit(1); });

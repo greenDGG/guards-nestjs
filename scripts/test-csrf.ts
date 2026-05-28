@@ -45,8 +45,11 @@ async function post(
   return { status: res.status, data: await res.json().catch(() => ({})) };
 }
 
+let failures = 0;
+
 function line(label: string, r: Result, expectOk: boolean) {
   const ok  = expectOk ? r.status < 400 : r.status >= 400;
+  if (!ok) failures++;
   const ico = ok ? '✅' : '❌';
   const msg = r.data?.message ?? JSON.stringify(r.data);
   console.log(`  ${ico}  ${label.padEnd(40)} ${r.status}  ${msg}`);
@@ -111,4 +114,6 @@ async function main() {
   console.log('════════════════════════════════════════════\n');
 }
 
-main().catch(console.error);
+main()
+  .then(() => { if (failures > 0) { console.error(`\n❌ ${failures} test(s) failed`); process.exit(1); } })
+  .catch((e: unknown) => { console.error(e); process.exit(1); });

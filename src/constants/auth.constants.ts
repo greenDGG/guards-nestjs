@@ -1,3 +1,14 @@
+function parseEnvInt(name: string, fallback: number): number {
+  const raw = process.env[name];
+  if (raw === undefined) return fallback;
+  const n = parseInt(raw, 10);
+  if (isNaN(n)) {
+    console.warn(`\x1b[33m⚠️  [CONFIG WARNING]\x1b[0m ${name}="${raw}" is not a valid integer — using default ${fallback}`);
+    return fallback;
+  }
+  return n;
+}
+
 // Fail fast if critical secrets are missing or still set to the insecure demo value.
 // In production, all secrets must come from the environment — no fallback.
 // In development, a fallback is allowed but a warning is printed.
@@ -19,10 +30,10 @@
 
 export const AUTH_CONSTANTS = {
   JWT_SECRET:              process.env.JWT_SECRET              ?? 'dev-insecure-jwt-secret',
-  JWT_EXPIRATION:          parseInt(process.env.JWT_EXPIRATION ?? '3600'),
+  JWT_EXPIRATION:          parseEnvInt('JWT_EXPIRATION', 3600),
   JWT_REFRESH_SECRET:      process.env.JWT_REFRESH_SECRET      ?? 'dev-insecure-refresh-secret',
-  JWT_REFRESH_EXPIRATION:  parseInt(process.env.JWT_REFRESH_EXPIRATION ?? '604800'),
-  PERMISSIONS_CACHE_TTL: parseInt(process.env.PERMISSIONS_CACHE_TTL || '300000'),
+  JWT_REFRESH_EXPIRATION:  parseEnvInt('JWT_REFRESH_EXPIRATION', 604800),
+  PERMISSIONS_CACHE_TTL:   parseEnvInt('PERMISSIONS_CACHE_TTL', 300000),
 
   ROLES: {
     ADMIN: 'admin',

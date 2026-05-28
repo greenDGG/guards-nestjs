@@ -64,6 +64,8 @@ function row(label: string, h: Hit) {
   console.log(`  ${icon(h)}  ${label.padEnd(58)}  HTTP ${h.status}  ${msg}`);
 }
 
+let failures = 0;
+
 async function main() {
   console.log('\n═══════════════════════════════════════════════════════════════');
   console.log('  guard-nest — HeaderValidationGuard Test');
@@ -246,4 +248,6 @@ async function main() {
   console.log('═══════════════════════════════════════════════════════════════\n');
 }
 
-main().catch(console.error);
+main()
+  .then(() => { if (failures > 0) { console.error(`\n❌ ${failures} test(s) failed`); process.exit(1); } })
+  .catch((e: unknown) => { console.error(e); process.exit(1); });

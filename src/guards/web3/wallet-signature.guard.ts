@@ -56,7 +56,10 @@ export class WalletSignatureGuard implements CanActivate {
 
   private async loadEthers(): Promise<void> {
     try {
-      // Dynamic import — ethers is an optional peer dependency
+      // require() rather than await import(): TypeScript resolves dynamic import()
+      // paths at compile time, so `import('ethers')` fails tsc when ethers is not
+      // installed. require() bypasses that check and is fine here — Node.js caches
+      // the module after the first call so there is no repeated I/O cost.
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       this.ethers = require('ethers');
     } catch {

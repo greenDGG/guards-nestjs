@@ -40,6 +40,8 @@ async function get(
   return { status: res.status, data: await res.json().catch(() => ({})), headers };
 }
 
+let failures = 0;
+
 function log(status: number, label: string, extra?: string) {
   const icon = status === 200 ? '✅' : status === 429 ? '🚦' : '⚠️ ';
   console.log(`${icon} [${status}] ${label}${extra ? `  —  ${extra}` : ''}`);
@@ -121,4 +123,6 @@ function getTier(score: number): string {
   return 'vip (×2.00)';
 }
 
-main().catch(console.error);
+main()
+  .then(() => { if (failures > 0) { console.error(`\n❌ ${failures} test(s) failed`); process.exit(1); } })
+  .catch((e: unknown) => { console.error(e); process.exit(1); });

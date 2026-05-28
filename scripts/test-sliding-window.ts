@@ -40,6 +40,8 @@ function fmt(r: { status: number; headers: Headers }): string {
   return retry ? `${base}  retry-after=${retry}s` : base;
 }
 
+let failures = 0;
+
 async function main() {
   console.log('\n════════════════════════════════════════════');
   console.log('  guard-nest — Sliding Window Rate Limit Test');
@@ -91,4 +93,6 @@ async function main() {
   console.log('════════════════════════════════════════════\n');
 }
 
-main().catch(console.error);
+main()
+  .then(() => { if (failures > 0) { console.error(`\n❌ ${failures} test(s) failed`); process.exit(1); } })
+  .catch((e: unknown) => { console.error(e); process.exit(1); });

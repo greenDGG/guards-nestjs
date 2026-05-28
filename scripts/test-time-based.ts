@@ -21,6 +21,8 @@ async function get(path: string): Promise<{ status: number; data: unknown }> {
   return { status: res.status, data: await res.json().catch(() => ({})) };
 }
 
+let failures = 0;
+
 function log(status: number, label: string, extra?: string) {
   const icon = status === 200 ? '✅' : status === 403 ? '🚫' : '⚠️ ';
   console.log(`${icon} [${status}] ${label}${extra ? `  —  ${extra}` : ''}`);
@@ -101,4 +103,6 @@ async function main() {
   console.log('════════════════════════════════════════════\n');
 }
 
-main().catch(console.error);
+main()
+  .then(() => { if (failures > 0) { console.error(`\n❌ ${failures} test(s) failed`); process.exit(1); } })
+  .catch((e: unknown) => { console.error(e); process.exit(1); });
