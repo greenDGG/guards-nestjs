@@ -1,4 +1,4 @@
-import { ForbiddenException, UnauthorizedException, HttpException, HttpStatus, BadRequestException } from '@nestjs/common';
+import { ForbiddenException, UnauthorizedException, HttpException, HttpStatus, BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 
 export class IpBlockedException extends ForbiddenException {
   constructor(ip: string) {
@@ -143,6 +143,17 @@ export class MissingRequiredHeaderException extends BadRequestException {
   constructor(header: string) {
     super(`Missing required header: '${header}'`);
     this.name = 'MissingRequiredHeaderException';
+  }
+}
+
+export class EmergencyLockException extends ServiceUnavailableException {
+  constructor(key: string, reason: string, retryAfterSeconds?: number) {
+    super({
+      message:    `Service temporarily unavailable: ${reason}`,
+      key,
+      retryAfter: retryAfterSeconds ?? null,
+    });
+    this.name = 'EmergencyLockException';
   }
 }
 

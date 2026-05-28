@@ -53,7 +53,8 @@
     "test:risk-score": "ts-node scripts/test-risk-score.ts",
     "test:session-hijack": "ts-node scripts/test-session-hijack.ts",
     "test:rate-limit-by-route": "ts-node scripts/test-rate-limit-by-route.ts",
-    "test:header-validation": "ts-node scripts/test-header-validation.ts"
+    "test:header-validation": "ts-node scripts/test-header-validation.ts",
+    "test:emergency-lock": "ts-node scripts/test-emergency-lock.ts"
   },
   "keywords": ["nestjs", "guards", "jwt", "roles", "permissions", "authentication", "authorization"],
   "dependencies": {

@@ -4,9 +4,9 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
 ![NestJS](https://img.shields.io/badge/NestJS-11.x-E0234E?logo=nestjs&logoColor=white)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
-![Guards](https://img.shields.io/badge/guards-38-blueviolet)
+![Guards](https://img.shields.io/badge/guards-39-blueviolet)
 
-38 guards NestJS listos para copiar — desde JWT básico hasta detección de bots y wallets cripto.
+39 guards NestJS listos para copiar — desde JWT básico hasta detección de bots y wallets cripto.
 
 **No es un paquete npm.** Encuentras el guard que necesitas, copias el archivo y lo adaptas.
 
@@ -81,24 +81,25 @@ curl -X POST http://localhost:3000/auth/login \
 | 18 | Security | `TimingAttackGuard` | `POST /demo/level2/timing-fast` |
 | 19 | Security | `CsrfGuard` | `POST /demo/level2/csrf-protected` |
 | 20 | Security | `HeaderValidationGuard` | `GET /demo/level2/header-check` |
-| 21 | Rate Limit | `SlidingWindowRateLimitGuard` | `GET /demo/level3/sliding-window` |
-| 22 | Rate Limit | `AdaptiveRateLimitGuard` | `GET /demo/level3/adaptive` |
-| 23 | Rate Limit | `RateLimitByRouteGuard` | `GET /demo/level3/login-sim` |
-| 24 | Rate Limit | `CircuitBreakerGuard` | `GET /demo/level3/circuit-breaker` |
-| 25 | Detection | `BotDetectionGuard` | `GET /demo/level4/bot-check` |
-| 26 | Detection | `GeoIpGuard` | `GET /demo/level4/geo` |
-| 27 | Detection | `DeviceFingerprintGuard` | `GET /demo/level4/fingerprint` |
-| 28 | Detection | `AnomalyDetectionGuard` | `GET /demo/level4/anomaly` |
-| 29 | Detection | `RiskScoreGuard` | `GET /demo/level4/risk-score` |
-| 30 | Detection | `SessionHijackGuard` | `GET /demo/level4/session-hijack` |
-| 31 | Business | `SubscriptionGuard` | `GET /demo/level5/pro-feature` |
-| 32 | Business | `TimeBasedAccessGuard` | `GET /demo/level5/office-hours` |
-| 33 | Business | `TenantGuard` | `GET /demo/level5/:tenantId/data` |
-| 34 | Business | `MfaGuard` | `POST /demo/level5/sensitive-action` |
-| 35 | Web3 | `WalletSignatureGuard` | `POST /demo/level6/wallet-action` |
-| 36 | Web3 | `SuspiciousTransactionGuard` | `POST /demo/level6/withdraw` |
-| 37 | Web3 | `TokenHolderGuard` | `GET /demo/level6/token-gate` |
-| 38 | Web3 | `ChainIdGuard` | `POST /demo/level6/swap` |
+| 21 | Security | `EmergencyLockGuard` | `GET /demo/level2/emergency-check` |
+| 22 | Rate Limit | `SlidingWindowRateLimitGuard` | `GET /demo/level3/sliding-window` |
+| 23 | Rate Limit | `AdaptiveRateLimitGuard` | `GET /demo/level3/adaptive` |
+| 24 | Rate Limit | `RateLimitByRouteGuard` | `GET /demo/level3/login-sim` |
+| 25 | Rate Limit | `CircuitBreakerGuard` | `GET /demo/level3/circuit-breaker` |
+| 26 | Detection | `BotDetectionGuard` | `GET /demo/level4/bot-check` |
+| 27 | Detection | `GeoIpGuard` | `GET /demo/level4/geo` |
+| 28 | Detection | `DeviceFingerprintGuard` | `GET /demo/level4/fingerprint` |
+| 29 | Detection | `AnomalyDetectionGuard` | `GET /demo/level4/anomaly` |
+| 30 | Detection | `RiskScoreGuard` | `GET /demo/level4/risk-score` |
+| 31 | Detection | `SessionHijackGuard` | `GET /demo/level4/session-hijack` |
+| 32 | Business | `SubscriptionGuard` | `GET /demo/level5/pro-feature` |
+| 33 | Business | `TimeBasedAccessGuard` | `GET /demo/level5/office-hours` |
+| 34 | Business | `TenantGuard` | `GET /demo/level5/:tenantId/data` |
+| 35 | Business | `MfaGuard` | `POST /demo/level5/sensitive-action` |
+| 36 | Web3 | `WalletSignatureGuard` | `POST /demo/level6/wallet-action` |
+| 37 | Web3 | `SuspiciousTransactionGuard` | `POST /demo/level6/withdraw` |
+| 38 | Web3 | `TokenHolderGuard` | `GET /demo/level6/token-gate` |
+| 39 | Web3 | `ChainIdGuard` | `POST /demo/level6/swap` |
 
 ---
 
@@ -108,7 +109,7 @@ curl -X POST http://localhost:3000/auth/login \
 |-----------|------|
 | Basic | [JWT](docs/guards/basic/jwt-auth.md) · [Roles](docs/guards/basic/roles.md) · [Permissions](docs/guards/basic/permissions.md) · [ApiKey](docs/guards/basic/api-key.md) · [BasicAuth](docs/guards/basic/basic-auth.md) |
 | Basic+ | [Ownership](docs/guards/basic/ownership.md) · [Signature](docs/guards/basic/signature.md) · [Idempotency](docs/guards/basic/idempotency.md) · [Nonce](docs/guards/basic/nonce.md) · [Concurrency](docs/guards/basic/concurrency.md) · [ReplayProtection](docs/guards/basic/replay-protection.md) · [AuditLog](docs/guards/basic/audit-log.md) |
-| Security | [IP/CIDR](docs/guards/security/ip.md) · [HTTPS](docs/guards/security/https-only.md) · [RequestSize](docs/guards/security/request-size.md) · [ContentType](docs/guards/security/content-type.md) · [CORS](docs/guards/security/cors.md) · [TimingAttack](docs/guards/security/timing-attack.md) · [CSRF](docs/guards/security/csrf.md) · [HeaderValidation](docs/guards/security/header-validation.md) |
+| Security | [IP/CIDR](docs/guards/security/ip.md) · [HTTPS](docs/guards/security/https-only.md) · [RequestSize](docs/guards/security/request-size.md) · [ContentType](docs/guards/security/content-type.md) · [CORS](docs/guards/security/cors.md) · [TimingAttack](docs/guards/security/timing-attack.md) · [CSRF](docs/guards/security/csrf.md) · [HeaderValidation](docs/guards/security/header-validation.md) · [EmergencyLock](docs/guards/security/emergency-lock.md) |
 | Rate Limit | [SlidingWindow](docs/guards/rate-limit/sliding-window.md) · [Adaptive](docs/guards/rate-limit/adaptive.md) · [RateLimitByRoute](docs/guards/rate-limit/rate-limit-by-route.md) · [CircuitBreaker](docs/guards/rate-limit/circuit-breaker.md) |
 | Detection | [BotDetection](docs/guards/detection/bot-detection.md) · [GeoIP](docs/guards/detection/geo-ip.md) · [DeviceFingerprint](docs/guards/detection/device-fingerprint.md) · [Anomaly](docs/guards/detection/anomaly-detection.md) · [RiskScore](docs/guards/detection/risk-score.md) · [SessionHijack](docs/guards/detection/session-hijack.md) |
 | Business | [Subscription](docs/guards/business/subscription.md) · [TimeAccess](docs/guards/business/time-access.md) · [Tenant](docs/guards/business/tenant.md) · [MFA](docs/guards/business/mfa.md) |
@@ -135,7 +136,7 @@ Cada capa es opcional. Usas solo las que necesita tu endpoint.
 src/
 ├── guards/
 │   ├── basic/        # JWT, Roles, Perms, ApiKey, BasicAuth, Ownership, Signature, Idempotency, Nonce, Concurrency
-│   ├── security/     # IP, HTTPS, RequestSize, ContentType, CORS, TimingAttack, CSRF
+│   ├── security/     # IP, HTTPS, RequestSize, ContentType, CORS, TimingAttack, CSRF, HeaderValidation, EmergencyLock
 │   ├── rate-limit/   # SlidingWindow, Adaptive, CircuitBreaker
 │   ├── detection/    # BotDetection, GeoIP, DeviceFingerprint, Anomaly
 │   ├── business/     # Subscription, TimeAccess, Tenant, MFA
@@ -182,6 +183,7 @@ npm run test:risk-score         # RiskScoreGuard
 npm run test:session-hijack        # SessionHijackGuard
 npm run test:rate-limit-by-route   # RateLimitByRouteGuard
 npm run test:header-validation     # HeaderValidationGuard
+npm run test:emergency-lock        # EmergencyLockGuard
 ```
 
 </details>

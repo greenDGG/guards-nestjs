@@ -1,4 +1,6 @@
 import { Controller, ForbiddenException, Get, Post, Body, Res, UseGuards, UseInterceptors, SetMetadata } from '@nestjs/common';
+import { EmergencyLockGuard } from '../guards/security/emergency-lock.guard';
+import { EmergencyLock } from '../decorators/emergency-lock.decorator';
 import { HeaderValidationGuard } from '../guards/security/header-validation.guard';
 import { HeaderValidate } from '../decorators/header-validation.decorator';
 import { Response } from 'express';
@@ -450,6 +452,69 @@ export class Level2SecurityController {
       mode:    'logOnly: true — nunca bloquea',
       message: 'Siempre pasa. Mira los logs del servidor para ver X-Header-Violations.',
       tip:     'Envía con curl (sin headers de navegador) para ver las violations en logs',
+    };
+  }
+
+  // ══ EmergencyLockGuard — kill switch de endpoints ════════════════════════════
+  //
+  // Prueba con: npm run test:emergency-lock
+  // Admin API: POST /emergency/lock   { key, reason, ttlSeconds? }
+  //            POST /emergency/unlock { key }
+  //            GET  /emergency/status
+  // Header: x-admin-key: <EMERGENCY_LOCK_ADMIN_KEY env var>
+
+  // Simula un endpoint de operaciones que puede ser bloqueado de emergencia
+  @Get('emergency-check')
+  @EmergencyLock({ key: 'demo-check' })
+  @UseGuards(EmergencyLockGuard)
+  emergencyCheck() {
+    return {
+      guard:   'EmergencyLockGuard',
+      key:     'demo-check',
+      status:  'operational',
+      tip:     'POST /emergency/lock { "key": "demo-check", "reason": "test" } para bloquearlo',
+    };
+  }
+
+  // Simula un endpoint de login que puede ser apagado durante un ataque de fuerza bruta
+  @Post('emergency-login')
+  @EmergencyLock({ key: 'login' })
+  @UseGuards(EmergencyLockGuard)
+  emergencyLogin(@Body() body: any) {
+    return {
+      guard:    'EmergencyLockGuard',
+      key:      'login',
+      status:   'operational',
+      user:     body?.username ?? null,
+      tip:      'Lock key "login" para simular parar un ataque de credential stuffing',
+    };
+  }
+
+  // Simula un endpoint de retiro — bloqueo de emergencia con TTL (auto-unlock)
+  @Post('emergency-withdraw')
+  @EmergencyLock({ key: 'withdrawals' })
+  @UseGuards(EmergencyLockGuard)
+  emergencyWithdraw(@Body() body: any) {
+    return {
+      guard:   'EmergencyLockGuard',
+      key:     'withdrawals',
+      status:  'operational',
+      amount:  body?.amount ?? 0,
+      tip:     'Lock con ttlSeconds para auto-unlock después de N segundos',
+    };
+  }
+
+  // Observación: logOnly=true — nunca bloquea, solo registra
+  @Get('emergency-observe')
+  @EmergencyLock({ key: 'observe-demo', logOnly: true })
+  @UseGuards(EmergencyLockGuard)
+  emergencyObserve() {
+    return {
+      guard:   'EmergencyLockGuard',
+      key:     'observe-demo',
+      mode:    'logOnly: true',
+      status:  'siempre pasa — mira los logs del servidor si la key está locked',
+      tip:     'Lock "observe-demo" y llama este endpoint para ver la violation en logs sin 503',
     };
   }
 

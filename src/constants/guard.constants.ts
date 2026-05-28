@@ -12,7 +12,8 @@ export const GUARD_METADATA = {
   SESSION_HIJACK_OPTIONS: 'guardNest:sessionHijack:options',
   CONCURRENCY_OPTIONS: 'guardNest:concurrency:options',
   // Security
-  HEADER_VALIDATION_OPTIONS: 'guardNest:headerValidation:options',
+  HEADER_VALIDATION_OPTIONS:  'guardNest:headerValidation:options',
+  EMERGENCY_LOCK_OPTIONS:     'guardNest:emergencyLock:options',
   IP_OPTIONS: 'guardNest:ip:options',
   REQUEST_SIZE_OPTIONS: 'guardNest:requestSize:options',
   CONTENT_TYPE_OPTIONS: 'guardNest:contentType:options',

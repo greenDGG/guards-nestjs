@@ -5,6 +5,7 @@ import { Level3RateLimitController } from './level3-rate-limit.controller';
 import { Level4DetectionController } from './level4-detection.controller';
 import { Level5BusinessController } from './level5-business.controller';
 import { Level6Web3Controller } from './level6-web3.controller';
+import { EmergencyLockAdminController } from '../guards/security/emergency-lock-admin.controller';
 
 @Module({
   controllers: [
@@ -14,6 +15,7 @@ import { Level6Web3Controller } from './level6-web3.controller';
     Level4DetectionController,
     Level5BusinessController,
     Level6Web3Controller,
+    EmergencyLockAdminController,
   ],
 })
 export class DemoModule {}

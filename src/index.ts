@@ -39,6 +39,8 @@ export { CorsGuard } from './guards/security/cors.guard';
 export type { CorsGuardOptions } from './guards/security/cors.guard';
 export { TimingAttackGuard, TimingAttackInterceptor } from './guards/security/timing-attack.guard';
 export { HeaderValidationGuard } from './guards/security/header-validation.guard';
+export { EmergencyLockGuard } from './guards/security/emergency-lock.guard';
+export { EmergencyLockAdminController } from './guards/security/emergency-lock-admin.controller';
 export type { TimingAttackOptions } from './guards/security/timing-attack.guard';
 export { CsrfGuard, generateCsrfToken } from './guards/security/csrf.guard';
 export type { CsrfOptions } from './guards/security/csrf.guard';
@@ -115,6 +117,8 @@ export type { ConcurrencyOptions } from './decorators/concurrent.decorator';
 export { RateLimit } from './decorators/rate-limit-by-route.decorator';
 export { HeaderValidate } from './decorators/header-validation.decorator';
 export type { HeaderValidationOptions, HeaderRule } from './decorators/header-validation.decorator';
+export { EmergencyLock } from './decorators/emergency-lock.decorator';
+export type { EmergencyLockOptions } from './decorators/emergency-lock.decorator';
 export type { RateLimitByRouteOptions, RateLimitProfile } from './decorators/rate-limit-by-route.decorator';
 export { IpFilter } from './decorators/ip.decorator';
 export type { IpGuardOptions } from './decorators/ip.decorator';
@@ -163,6 +167,7 @@ export {
   CsrfTokenException,
   InvalidHeaderException,
   MissingRequiredHeaderException,
+  EmergencyLockException,
 } from './exceptions/security.exception';
 export {
   BotDetectedException,
@@ -201,6 +206,8 @@ export { AnomalyDetectionService } from './services/anomaly-detection.service';
 export { Web3RpcService } from './services/web3-rpc.service';
 export { EtherscanService } from './services/etherscan.service';
 export { SecurityContextService } from './services/security-context.service';
+export { EmergencyLockService } from './services/emergency-lock.service';
+export type { LockState } from './services/emergency-lock.service';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 export { AUTH_CONSTANTS } from './constants/auth.constants';
