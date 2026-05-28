@@ -38,4 +38,16 @@ export class AuthController {
   health() {
     return { status: 'ok', message: 'Auth service is running', timestamp: new Date().toISOString() };
   }
+
+  // Genera un token con mfaVerifiedAt — solo para test scripts (no usar en producción)
+  @Public()
+  @Post('test/mfa-token')
+  @HttpCode(HttpStatus.OK)
+  async mfaTestToken(
+    @Body() body: { username: string; password: string; mfaAgeSeconds?: number | null },
+  ) {
+    // null → sin mfaVerifiedAt en el token  |  número → mfaVerifiedAt = now - mfaAgeSeconds
+    const mfaAge = typeof body.mfaAgeSeconds === 'number' ? body.mfaAgeSeconds : null;
+    return this.authService.loginWithMfa(body.username, body.password, mfaAge);
+  }
 }

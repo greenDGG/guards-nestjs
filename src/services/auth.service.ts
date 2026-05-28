@@ -106,4 +106,25 @@ export class AuthService {
   async getUserById(userId: number): Promise<User | null> {
     return MOCK_USERS[userId] || null;
   }
+
+  async loginWithMfa(
+    username: string,
+    password: string,
+    mfaAgeSeconds: number | null,
+  ): Promise<{ accessToken: string }> {
+    const user = await this.validateUser(username, password);
+    if (!user) throw new InvalidCredentialsException();
+
+    const now = Math.floor(Date.now() / 1000);
+    const payload: Partial<JwtPayload> = {
+      sub: user.id,
+      username: user.username,
+      email: user.email,
+      roles: user.roles,
+      permissions: user.permissions,
+      mfaVerifiedAt: mfaAgeSeconds !== null ? now - mfaAgeSeconds : undefined,
+    };
+
+    return { accessToken: this.jwtService.signToken(payload) };
+  }
 }

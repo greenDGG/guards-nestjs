@@ -130,6 +130,7 @@ export class Level5BusinessController {
 
   // ── MFA — verifica que el usuario completó MFA recientemente ─────────────
   // El JWT debe contener mfaVerifiedAt (unix timestamp en segundos)
+  // Ejecuta: npx ts-node scripts/test-mfa.ts
   @Get('mfa-required')
   @SetMetadata(GUARD_METADATA.MFA_OPTIONS, { maxAgeSeconds: 3600 })
   @UseGuards(MfaGuard)
@@ -140,6 +141,26 @@ export class Level5BusinessController {
     return {
       guard: 'MfaGuard',
       message: 'MFA verificado correctamente',
+      mfaVerifiedSecondsAgo: mfaAge,
+    };
+  }
+
+  // ── MFA — soft (required: false) ─────────────────────────────────────────
+  // Pasa aunque el usuario no tenga MFA configurado.
+  // Útil para endpoints sensibles que quieren aprovechar MFA si está disponible
+  // pero no quieren bloquear a usuarios que aún no lo configuraron.
+  @Get('mfa-optional')
+  @SetMetadata(GUARD_METADATA.MFA_OPTIONS, { maxAgeSeconds: 3600, required: false })
+  @UseGuards(MfaGuard)
+  mfaOptional(@CurrentUser() user: JwtPayload) {
+    const mfaAge = user.mfaVerifiedAt
+      ? Math.floor(Date.now() / 1000) - user.mfaVerifiedAt
+      : null;
+    return {
+      guard: 'MfaGuard (required: false)',
+      message: mfaAge !== null
+        ? `MFA verificado hace ${mfaAge}s — acceso con 2FA`
+        : 'Sin MFA en el token — acceso de todas formas (required: false)',
       mfaVerifiedSecondsAgo: mfaAge,
     };
   }

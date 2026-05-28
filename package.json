@@ -31,7 +31,8 @@
     "test:jwt": "ts-node scripts/test-jwt.ts",
     "test:ownership": "ts-node scripts/test-ownership.ts",
     "test:roles": "ts-node scripts/test-roles.ts",
-    "test:permissions": "ts-node scripts/test-permissions.ts"
+    "test:permissions": "ts-node scripts/test-permissions.ts",
+    "test:mfa": "ts-node scripts/test-mfa.ts"
   },
   "keywords": ["nestjs", "guards", "jwt", "roles", "permissions", "authentication", "authorization"],
   "dependencies": {
