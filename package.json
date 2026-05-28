@@ -35,7 +35,8 @@
     "test:mfa": "ts-node scripts/test-mfa.ts",
     "test:subscription": "ts-node scripts/test-subscription.ts",
     "test:tenant": "ts-node scripts/test-tenant.ts",
-    "test:time-based": "ts-node scripts/test-time-based.ts"
+    "test:time-based": "ts-node scripts/test-time-based.ts",
+    "test:fingerprint": "ts-node scripts/test-fingerprint.ts"
   },
   "keywords": ["nestjs", "guards", "jwt", "roles", "permissions", "authentication", "authorization"],
   "dependencies": {

@@ -120,8 +120,8 @@ export class Level4DetectionController {
     };
   }
 
-  // ── Device Fingerprint ────────────────────────────────────────────────────
-  // Compara fingerprint de headers entre requests del mismo usuario
+  // ── Device Fingerprint — block on mismatch ────────────────────────────────
+  @SetMetadata(IS_PUBLIC_KEY, false)
   @Get('fingerprint')
   @SetMetadata(GUARD_METADATA.DEVICE_FP_OPTIONS, { onMismatch: 'block' })
   @UseGuards(DeviceFingerprintGuard)
@@ -130,6 +130,19 @@ export class Level4DetectionController {
       guard: 'DeviceFingerprintGuard',
       message: 'Fingerprint de dispositivo registrado/verificado',
       tip: 'Cambia el User-Agent entre requests para simular un cambio de dispositivo',
+    };
+  }
+
+  // ── Device Fingerprint — penalize on mismatch (allows request through) ───
+  @SetMetadata(IS_PUBLIC_KEY, false)
+  @Get('fingerprint-penalize')
+  @SetMetadata(GUARD_METADATA.DEVICE_FP_OPTIONS, { onMismatch: 'penalize', penaltyAmount: 20 })
+  @UseGuards(DeviceFingerprintGuard)
+  fingerprintPenalize() {
+    return {
+      guard: 'DeviceFingerprintGuard (penalize)',
+      message: 'Fingerprint verificado — mismatch penaliza el trust score pero no bloquea',
+      tip: 'Cambia el User-Agent para ver cómo baja el trust score en /trust-score',
     };
   }
 
