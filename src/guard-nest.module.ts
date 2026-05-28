@@ -21,6 +21,7 @@ import { SecurityContextService } from './services/security-context.service';
 import { JwtAuthGuard } from './guards/basic/jwt-auth.guard';
 import { RolesGuard } from './guards/basic/roles.guard';
 import { PermissionsGuard } from './guards/basic/permissions.guard';
+import { AdaptiveRateLimitGuard } from './guards/rate-limit/adaptive-rate-limit.guard';
 import { IdempotencyInterceptor } from './guards/basic/idempotency.interceptor';
 import { ConcurrencyInterceptor } from './guards/basic/concurrency.interceptor';
 import { AUTH_CONSTANTS } from './constants/auth.constants';
@@ -53,6 +54,7 @@ const ALL_SERVICES = [
   Web3RpcService,
   EtherscanService,
   SecurityContextService,
+  AdaptiveRateLimitGuard,
   IdempotencyInterceptor,
   ConcurrencyInterceptor,
 ];

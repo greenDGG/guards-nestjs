@@ -1,11 +1,15 @@
 import { Controller, Get, Post, Body, UseGuards, SetMetadata } from '@nestjs/common';
-import { Public } from '../decorators/public.decorator';
+import { Public, IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { CurrentUser } from '../decorators/current-user.decorator';
 import { SecurityCtx } from '../decorators/security-context.decorator';
 import { SecurityContext } from '../interfaces/security-context.interface';
+import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { BotDetectionGuard } from '../guards/detection/bot-detection.guard';
 import { GeoIpGuard } from '../guards/detection/geo-ip.guard';
 import { DeviceFingerprintGuard } from '../guards/detection/device-fingerprint.guard';
 import { AnomalyDetectionGuard } from '../guards/detection/anomaly-detection.guard';
+import { AdaptiveRateLimitGuard } from '../guards/rate-limit/adaptive-rate-limit.guard';
+import { AnomalyDetectionService } from '../services/anomaly-detection.service';
 import { GUARD_METADATA } from '../constants/guard.constants';
 
 /**
@@ -13,10 +17,12 @@ import { GUARD_METADATA } from '../constants/guard.constants';
  * Base: http://localhost:3000/demo/level4
  *
  * Para probar bots: ejecuta scripts/test-bot.ts
+ * Para probar anomaly: ejecuta scripts/test-anomaly.ts
  */
 @Controller('demo/level4')
 @Public()
 export class Level4DetectionController {
+  constructor(private anomalyService: AnomalyDetectionService) {}
 
   // ── Bot Detection — umbral normal (70) ────────────────────────────────────
   // Prueba con User-Agent de curl/Puppeteer para ser bloqueado
@@ -128,7 +134,9 @@ export class Level4DetectionController {
   }
 
   // ── Anomaly Detection ─────────────────────────────────────────────────────
-  // No bloquea — solo penaliza el trust score si detecta comportamiento anormal
+  // No bloquea — solo penaliza el trust score si detecta comportamiento anormal.
+  // Ejecuta: npx ts-node scripts/test-anomaly.ts
+  @SetMetadata(IS_PUBLIC_KEY, false)
   @Get('anomaly')
   @SetMetadata(GUARD_METADATA.ANOMALY_OPTIONS, {
     rpmMultiplier: 2.0,
@@ -140,6 +148,45 @@ export class Level4DetectionController {
       guard: 'AnomalyDetectionGuard',
       message: 'Comportamiento registrado y analizado',
       tip: 'Dispara muchas requests rápidas para ver cómo baja el trust score',
+    };
+  }
+
+  // ── Trust Score — muestra el score actual del usuario ────────────────────
+  // Requiere JWT. Útil para observar el efecto de AnomalyDetectionGuard.
+  // @SetMetadata(IS_PUBLIC_KEY, false) overrides the class-level @Public() so JWT runs.
+  @SetMetadata(IS_PUBLIC_KEY, false)
+  @Get('trust-score')
+  async trustScore(@CurrentUser() user: JwtPayload) {
+    const score = await this.anomalyService.getTrustScore(user.sub);
+    return {
+      userId: user.sub,
+      trustScore: score,
+      tier: score <= 25 ? 'severely-untrusted (×0.02)'
+          : score <= 50 ? 'new-user (×0.10)'
+          : score <= 75 ? 'regular (×0.50)'
+          : score <= 90 ? 'trusted (×1.00)'
+          : 'vip (×2.00)',
+      tip: 'Dispara muchas requests rápidas a /anomaly para ver cómo baja',
+    };
+  }
+
+  // ── Anomaly + Adaptive Rate Limit juntos ──────────────────────────────────
+  // Demuestra el pipeline completo: AnomalyDetection penaliza → Adaptive ajusta límites.
+  // Headers de respuesta: X-RateLimit-Trust-Score, X-RateLimit-Trust-Tier, etc.
+  @SetMetadata(IS_PUBLIC_KEY, false)
+  @Get('anomaly-adaptive')
+  @SetMetadata(GUARD_METADATA.ANOMALY_OPTIONS, { rpmMultiplier: 2.0, trustScorePenalty: 15 })
+  @SetMetadata(GUARD_METADATA.ADAPTIVE_RATE_LIMIT_OPTIONS, {
+    windowMs: 60_000,
+    baseMax: 30,
+    keyBy: 'user',
+  })
+  @UseGuards(AnomalyDetectionGuard, AdaptiveRateLimitGuard)
+  anomalyAdaptive() {
+    return {
+      guards: ['AnomalyDetectionGuard', 'AdaptiveRateLimitGuard'],
+      message: 'Request registrada — revisa los headers X-RateLimit-* para ver tu trust score',
+      tip: 'Después de disparar muchas requests a /anomaly, los límites aquí bajarán automáticamente',
     };
   }
 
