@@ -138,12 +138,13 @@ async function main() {
   }
 
   {
-    const sig = hmac(githubSecret, rawBody); // falta el prefijo 'sha256='
+    // signaturePrefix solo se QUITA si está presente — enviar sin él también funciona
+    const sig = hmac(githubSecret, rawBody); // sin prefijo 'sha256='
 
     const { status, data } = await post('/demo/level2/webhook/github-style', payload, {
       'x-hub-signature-256': sig,
     });
-    log(status, 'Sin prefijo sha256= → 401 (se toma como parte de la firma)', data);
+    log(status, 'Sin prefijo sha256= → PASS (prefijo es opcional, no obligatorio)', data);
   }
 
   console.log('\n════════════════════════════════════════════');
