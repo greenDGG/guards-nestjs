@@ -22,6 +22,7 @@ import { JwtAuthGuard } from './guards/basic/jwt-auth.guard';
 import { RolesGuard } from './guards/basic/roles.guard';
 import { PermissionsGuard } from './guards/basic/permissions.guard';
 import { AdaptiveRateLimitGuard } from './guards/rate-limit/adaptive-rate-limit.guard';
+import { RateLimitByRouteGuard } from './guards/rate-limit/rate-limit-by-route.guard';
 import { IdempotencyInterceptor } from './guards/basic/idempotency.interceptor';
 import { ConcurrencyInterceptor } from './guards/basic/concurrency.interceptor';
 import { CircuitBreakerGuard, CircuitBreakerInterceptor } from './guards/rate-limit/circuit-breaker.guard';
@@ -62,6 +63,7 @@ const ALL_SERVICES = [
   EtherscanService,
   SecurityContextService,
   AdaptiveRateLimitGuard,
+  RateLimitByRouteGuard,
   CircuitBreakerGuard,
   CircuitBreakerInterceptor,
   TimingAttackGuard,

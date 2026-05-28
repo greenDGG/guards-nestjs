@@ -21,6 +21,7 @@ export const GUARD_METADATA = {
   // Rate limit
   RATE_LIMIT_OPTIONS: 'guardNest:rateLimit:options',
   ADAPTIVE_RATE_LIMIT_OPTIONS: 'guardNest:adaptiveRateLimit:options',
+  RATE_LIMIT_BY_ROUTE_OPTIONS: 'guardNest:rateLimitByRoute:options',
   CIRCUIT_BREAKER_OPTIONS: 'guardNest:circuitBreaker:options',
   // Detection
   BOT_OPTIONS: 'guardNest:bot:options',

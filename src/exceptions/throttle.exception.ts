@@ -24,3 +24,16 @@ export class RateLimitExceededException extends HttpException {
     this.name = 'RateLimitExceededException';
   }
 }
+
+export class PenaltyBoxException extends HttpException {
+  constructor(retryAfterSeconds: number) {
+    super(
+      {
+        message: `Temporarily blocked due to repeated rate limit violations. Retry after ${retryAfterSeconds}s`,
+        retryAfter: retryAfterSeconds,
+      },
+      HttpStatus.TOO_MANY_REQUESTS,
+    );
+    this.name = 'PenaltyBoxException';
+  }
+}

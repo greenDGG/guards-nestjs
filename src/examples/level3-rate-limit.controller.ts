@@ -1,5 +1,7 @@
-import { Controller, Get, UseGuards, UseInterceptors, SetMetadata } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, UseInterceptors, SetMetadata } from '@nestjs/common';
 import { Public } from '../decorators/public.decorator';
+import { RateLimitByRouteGuard } from '../guards/rate-limit/rate-limit-by-route.guard';
+import { RateLimit } from '../decorators/rate-limit-by-route.decorator';
 import { SecurityCtx } from '../decorators/security-context.decorator';
 import { SecurityContext } from '../interfaces/security-context.interface';
 import { SlidingWindowRateLimitGuard } from '../guards/rate-limit/sliding-window-rate-limit.guard';
@@ -131,5 +133,75 @@ export class Level3RateLimitController {
   @UseInterceptors(CircuitBreakerInterceptor)
   circuitHealthy() {
     return { message: 'Downstream respondió correctamente', state: 'recovered' };
+  }
+
+  // ══ RateLimitByRouteGuard — profiles + dual-window + penalty box ═══════════
+  //
+  // Prueba con: npm run test:rate-limit-by-route
+
+  // ── Perfil 'login' — 5 req/min, burst 2/5s, penalty 5min tras 3 violations ──
+  // Simula un endpoint de autenticación. Cambia la IP (header x-forwarded-for)
+  // o espera la ventana para ver el comportamiento del penalty box.
+  @Get('login-sim')
+  @RateLimit('login')
+  @UseGuards(RateLimitByRouteGuard)
+  loginSim() {
+    return {
+      guard:   'RateLimitByRouteGuard',
+      profile: 'login',
+      limits:  { sustained: '5 req / 60s', burst: '2 req / 5s', penalty: '5 min tras 3 violations' },
+      tip:     'Dispara 3+ requests en 5s para ver el burst block; repite para activar penalty box',
+    };
+  }
+
+  // ── Perfil 'payment' — 10 req/min, burst 2/10s, penalty 15min tras 2 violations ─
+  @Post('payment-sim')
+  @RateLimit('payment')
+  @UseGuards(RateLimitByRouteGuard)
+  paymentSim() {
+    return {
+      guard:   'RateLimitByRouteGuard',
+      profile: 'payment',
+      limits:  { sustained: '10 req / 60s', burst: '2 req / 10s', penalty: '15 min tras 2 violations' },
+      tip:     'POST para simular operación financiera. Burst muy agresivo activa penalty rápido.',
+    };
+  }
+
+  // ── Perfil 'search' — 60 req/min, burst 15/5s, sin penalty ────────────────
+  @Get('search-sim')
+  @RateLimit('search')
+  @UseGuards(RateLimitByRouteGuard)
+  searchSim() {
+    return {
+      guard:   'RateLimitByRouteGuard',
+      profile: 'search',
+      limits:  { sustained: '60 req / 60s', burst: '15 req / 5s', penalty: 'desactivado' },
+      tip:     'Perfil relajado. Requiere muchas requests para alcanzar el límite.',
+    };
+  }
+
+  // ── Perfil 'api' — 100 req/min, burst 20/5s ───────────────────────────────
+  @Get('api-sim')
+  @RateLimit('api')
+  @UseGuards(RateLimitByRouteGuard)
+  apiSim() {
+    return {
+      guard:   'RateLimitByRouteGuard',
+      profile: 'api',
+      limits:  { sustained: '100 req / 60s', burst: '20 req / 5s', penalty: 'desactivado' },
+    };
+  }
+
+  // ── Config custom — profile + override + burst ajustado ───────────────────
+  // Demuestra que cada campo del perfil puede ser sobreescrito individualmente.
+  @Get('custom-burst')
+  @RateLimit({ profile: 'login', max: 10, burstMax: 3, burstWindowMs: 3_000, penaltyMs: 60_000 })
+  @UseGuards(RateLimitByRouteGuard)
+  customBurst() {
+    return {
+      guard:   'RateLimitByRouteGuard',
+      profile: 'login (override: max=10, burst=3/3s, penalty=60s)',
+      tip:     'Muestra cómo sobrescribir campos específicos de un perfil',
+    };
   }
 }

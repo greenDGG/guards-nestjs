@@ -62,6 +62,7 @@ export type { SlidingWindowOptions } from './guards/rate-limit/sliding-window-ra
 export { AdaptiveRateLimitGuard } from './guards/rate-limit/adaptive-rate-limit.guard';
 export type { AdaptiveRateLimitOptions, SignalTier } from './guards/rate-limit/adaptive-rate-limit.guard';
 export { DEFAULT_TRUST_TIERS, DEFAULT_BOT_TIERS } from './guards/rate-limit/adaptive-rate-limit.guard';
+export { RateLimitByRouteGuard } from './guards/rate-limit/rate-limit-by-route.guard';
 export { CircuitBreakerGuard, CircuitBreakerInterceptor } from './guards/rate-limit/circuit-breaker.guard';
 export type { CircuitBreakerOptions } from './guards/rate-limit/circuit-breaker.guard';
 
@@ -110,6 +111,8 @@ export { Nonce } from './decorators/nonce.decorator';
 export type { NonceOptions } from './decorators/nonce.decorator';
 export { Concurrent } from './decorators/concurrent.decorator';
 export type { ConcurrencyOptions } from './decorators/concurrent.decorator';
+export { RateLimit } from './decorators/rate-limit-by-route.decorator';
+export type { RateLimitByRouteOptions, RateLimitProfile } from './decorators/rate-limit-by-route.decorator';
 export { IpFilter } from './decorators/ip.decorator';
 export type { IpGuardOptions } from './decorators/ip.decorator';
 export { RequireSubscription } from './decorators/subscription.decorator';
@@ -136,7 +139,7 @@ export {
   InsufficientPermissionsException,
   AccessDeniedException,
 } from './exceptions/permissions.exception';
-export { ThrottleException, RateLimitExceededException } from './exceptions/throttle.exception';
+export { ThrottleException, RateLimitExceededException, PenaltyBoxException } from './exceptions/throttle.exception';
 export {
   IpBlockedException,
   HttpsRequiredException,
