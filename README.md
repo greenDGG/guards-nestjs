@@ -116,21 +116,20 @@ src/
 └── scripts/          # Test scripts (one per guard category)
 ```
 
-### SecurityContext
+### SecurityContext (opcional)
 
-Todos los guards comparten estado por request vía `request.securityContext`:
+Los guards de detección escriben sus resultados en `request.securityContext` para que los handlers los puedan leer. Si no usas esos guards, ignora esto por completo.
 
 ```typescript
-{
-  ip, requestId, requestedAt,
-  botScore, isBot,           // BotDetectionGuard
-  geo,                       // GeoIpGuard
-  trustScore,                // AdaptiveRateLimitGuard
-  deviceFingerprint,         // DeviceFingerprintGuard
+// Solo disponible si usaste BotDetectionGuard, GeoIpGuard, etc.
+@Get('info')
+info(@SecurityCtx() ctx: SecurityContext) {
+  ctx.botScore        // BotDetectionGuard
+  ctx.geo             // GeoIpGuard
+  ctx.trustScore      // AdaptiveRateLimitGuard
+  ctx.deviceFingerprint // DeviceFingerprintGuard
 }
 ```
-
-Accesible en cualquier handler con `@SecurityCtx()`.
 
 ---
 
