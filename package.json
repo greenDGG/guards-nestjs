@@ -43,7 +43,8 @@
     "test:sliding-window": "ts-node scripts/test-sliding-window.ts",
     "test:content-type": "ts-node scripts/test-content-type.ts",
     "test:cors": "ts-node scripts/test-cors.ts",
-    "test:https-only": "ts-node scripts/test-https-only.ts"
+    "test:https-only": "ts-node scripts/test-https-only.ts",
+    "test:ip": "ts-node scripts/test-ip.ts"
   },
   "keywords": ["nestjs", "guards", "jwt", "roles", "permissions", "authentication", "authorization"],
   "dependencies": {
