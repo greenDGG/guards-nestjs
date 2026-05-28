@@ -10,6 +10,7 @@ import { HttpsOnlyGuard } from '../guards/security/https-only.guard';
 import { RequestSizeGuard } from '../guards/security/request-size.guard';
 import { ContentTypeGuard } from '../guards/security/content-type.guard';
 import { CorsGuard } from '../guards/security/cors.guard';
+import { TimingAttackGuard, TimingAttackInterceptor } from '../guards/security/timing-attack.guard';
 import { SignatureGuard } from '../guards/basic/signature.guard';
 import { IdempotencyInterceptor } from '../guards/basic/idempotency.interceptor';
 import { NonceGuard } from '../guards/basic/nonce.guard';
@@ -86,6 +87,41 @@ export class Level2SecurityController {
       message: 'Content-Type: application/json aceptado',
       body,
     };
+  }
+
+  // ── Timing Attack — respuesta siempre tarda ≥ 300ms ─────────────────────
+  //
+  //   Sin protección: path rápido (~5ms) vs. path lento (~200ms con bcrypt) →
+  //   el atacante sabe si el usuario existe midiendo el tiempo de respuesta.
+  //
+  //   Con protección: ambos paths padded a 300ms + jitter(0–100ms) →
+  //   el atacante no puede inferir nada del tiempo.
+  //
+  //   /timing-fast  → handler retorna de inmediato (simula "user not found")
+  //   /timing-slow  → handler tarda 200ms (simula bcrypt compare)
+  //   Ambos con minResponseMs=300 → el interceptor padea la diferencia
+  @Post('timing-fast')
+  @SetMetadata(GUARD_METADATA.TIMING_ATTACK_OPTIONS, { minResponseMs: 300, jitterMs: 100 })
+  @UseGuards(TimingAttackGuard)
+  @UseInterceptors(TimingAttackInterceptor)
+  timingFast() {
+    // Returns instantly — without protection, attacker sees ~5ms (user not found)
+    return { guard: 'TimingAttackGuard', path: 'fast', message: 'Retorna en <5ms internamente, padded a ≥300ms' };
+  }
+
+  @Post('timing-slow')
+  @SetMetadata(GUARD_METADATA.TIMING_ATTACK_OPTIONS, { minResponseMs: 300, jitterMs: 100 })
+  @UseGuards(TimingAttackGuard)
+  @UseInterceptors(TimingAttackInterceptor)
+  timingSlow() {
+    // Simulates 200ms bcrypt comparison — without protection, attacker sees ~200ms (user found)
+    return new Promise((resolve) =>
+      setTimeout(() => resolve({
+        guard: 'TimingAttackGuard',
+        path: 'slow',
+        message: 'Tarda 200ms internamente (bcrypt simulado), padded a ≥300ms',
+      }), 200),
+    );
   }
 
   // ── CORS ──────────────────────────────────────────────────────────────────

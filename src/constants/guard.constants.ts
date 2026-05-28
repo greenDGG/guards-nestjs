@@ -12,6 +12,7 @@ export const GUARD_METADATA = {
   REQUEST_SIZE_OPTIONS: 'guardNest:requestSize:options',
   CONTENT_TYPE_OPTIONS: 'guardNest:contentType:options',
   CORS_OPTIONS: 'guardNest:cors:options',
+  TIMING_ATTACK_OPTIONS: 'guardNest:timingAttack:options',
   // Rate limit
   RATE_LIMIT_OPTIONS: 'guardNest:rateLimit:options',
   ADAPTIVE_RATE_LIMIT_OPTIONS: 'guardNest:adaptiveRateLimit:options',

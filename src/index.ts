@@ -37,6 +37,8 @@ export { ContentTypeGuard } from './guards/security/content-type.guard';
 export type { ContentTypeOptions } from './guards/security/content-type.guard';
 export { CorsGuard } from './guards/security/cors.guard';
 export type { CorsGuardOptions } from './guards/security/cors.guard';
+export { TimingAttackGuard, TimingAttackInterceptor } from './guards/security/timing-attack.guard';
+export type { TimingAttackOptions } from './guards/security/timing-attack.guard';
 
 // ─── Level 3: Rate Limiting Guards ───────────────────────────────────────────
 export { SlidingWindowRateLimitGuard } from './guards/rate-limit/sliding-window-rate-limit.guard';

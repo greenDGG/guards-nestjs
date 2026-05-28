@@ -45,7 +45,8 @@
     "test:cors": "ts-node scripts/test-cors.ts",
     "test:https-only": "ts-node scripts/test-https-only.ts",
     "test:ip": "ts-node scripts/test-ip.ts",
-    "test:request-size": "ts-node scripts/test-request-size.ts"
+    "test:request-size": "ts-node scripts/test-request-size.ts",
+    "test:timing-attack": "ts-node scripts/test-timing-attack.ts"
   },
   "keywords": ["nestjs", "guards", "jwt", "roles", "permissions", "authentication", "authorization"],
   "dependencies": {
