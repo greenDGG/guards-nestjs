@@ -26,7 +26,8 @@
     "test:nonce": "ts-node scripts/test-nonce.ts",
     "test:concurrency": "ts-node scripts/test-concurrency.ts",
     "test:api-key": "ts-node scripts/test-api-key.ts",
-    "generate:api-key": "ts-node scripts/generate-api-key.ts"
+    "generate:api-key": "ts-node scripts/generate-api-key.ts",
+    "test:basic-auth": "ts-node scripts/test-basic-auth.ts"
   },
   "keywords": ["nestjs", "guards", "jwt", "roles", "permissions", "authentication", "authorization"],
   "dependencies": {
